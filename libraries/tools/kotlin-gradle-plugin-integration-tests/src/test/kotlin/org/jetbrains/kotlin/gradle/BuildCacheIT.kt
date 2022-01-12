@@ -147,4 +147,27 @@ class BuildCacheIT : KGPBaseTest() {
             }
         }
     }
+
+    @DisplayName("Restore from build cache should not break incremental compilation")
+    @GradleTest
+    fun testIncrementalCompilationAfterCacheHit(gradleVersion: GradleVersion) {
+        project("incrementalMultiproject", gradleVersion) {
+            enableLocalBuildCache(localBuildCacheDir)
+            build("assemble")
+            build("clean", "assemble") {
+                assertTasksFromCache(":lib:compileKotlin")
+                assertTasksFromCache(":app:compileKotlin")
+            }
+            val bKtSourceFile = projectPath.resolve("lib/src/main/kotlin/bar/B.kt")
+
+            bKtSourceFile.modify { it.replace("fun b() {}", "fun b() {}\nfun b2() {}") }
+
+            build("assemble", buildOptions = defaultBuildOptions.copy(logLevel = LogLevel.DEBUG)) {
+                assertOutputDoesNotContain("[KOTLIN] [IC] Non-incremental compilation will be performed")
+                assertSourceFileRecompiled(setOf(bKtSourceFile, projectPath.resolve("app/src/main/kotlin/foo/BB.kt")), projectPath)
+            }
+
+        }
+    }
+
 }

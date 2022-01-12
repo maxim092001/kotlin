@@ -7,6 +7,8 @@ package org.jetbrains.kotlin.gradle.testbase
 
 import org.gradle.testkit.runner.BuildResult
 import java.nio.file.Path
+import kotlin.io.path.relativeTo
+import kotlin.test.assertEquals
 
 /**
  * Asserts Gradle output contains [expectedSubString] string.
@@ -124,6 +126,29 @@ fun BuildResult.assertNoBuildWarnings(
         printBuildOutput()
 
         "Build contains following warnings:\n ${warnings.joinToString(separator = "\n")}"
+    }
+}
+
+fun BuildResult.assertSourceFileRecompiled(
+    sourceFiles: Set<Path> = emptySet(),
+    projectPath: Path
+) {
+    val recompiledSources = output
+        .lineSequence()
+        .filter { it.contains("[KOTLIN] compile iteration:") }
+        .flatMap { it.substringAfter("[KOTLIN] compile iteration:").split(",") }
+        .map { projectPath.resolve(it.trim()) }
+        .toSet()
+
+    assert(sourceFiles.containsAll(recompiledSources) && recompiledSources.containsAll(sourceFiles)) {
+        printBuildOutput()
+        """
+        |Expected sources to be recompiled:
+        | ${sourceFiles.joinToString()}
+        |        
+        |but was:
+        |${recompiledSources.joinToString()}
+        """.trimMargin()
     }
 }
 

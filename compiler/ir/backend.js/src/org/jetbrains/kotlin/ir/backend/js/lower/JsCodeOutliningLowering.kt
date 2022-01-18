@@ -166,6 +166,7 @@ private class JsCodeOutlineTransformer(
             name = Name.identifier("outlinedJsCode$")
             visibility = DescriptorVisibilities.LOCAL
             returnType = backendContext.dynamicType
+            isInline = true
             origin = OUTLINED_ORIGIN
         }
         // We don't need this function's body. Using empty block body stub, because some code might expect all functions to have bodies.

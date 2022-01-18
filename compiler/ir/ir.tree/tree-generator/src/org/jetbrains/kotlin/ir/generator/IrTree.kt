@@ -182,11 +182,15 @@ object IrTree : AbstractTreeBuilder() {
         +field("body", blockBody, mutable = true, isChild = true)
     }
     val declarationContainer by element(Declaration) {
+        ownsChildren = false
+
         parent(declarationParent)
 
         +listField("declarations", declaration, mutability = List, isChild = true)
     }
     val typeParametersContainer by element(Declaration) {
+        ownsChildren = false
+
         parent(declaration)
         parent(declarationParent)
 
@@ -447,6 +451,7 @@ object IrTree : AbstractTreeBuilder() {
     }
     val packageFragment by element(Declaration) {
         visitorParent = baseElement
+        ownsChildren = false
 
         parent(declarationContainer)
         parent(symbolOwner)
@@ -493,6 +498,8 @@ object IrTree : AbstractTreeBuilder() {
         +field("type", irTypeType, mutable = true)
     }
     val statementContainer by element(Expression) {
+        ownsChildren = false
+
         +listField("statements", statement, mutability = List, isChild = true)
     }
     val body by element(Expression) {
@@ -832,6 +839,7 @@ object IrTree : AbstractTreeBuilder() {
     val fieldAccessExpression by element(Expression) {
         visitorParent = declarationReference
         visitorName = "fieldAccess"
+        ownsChildren = false
 
         parent(declarationReference)
 
@@ -880,6 +888,7 @@ object IrTree : AbstractTreeBuilder() {
     val loop by element(Expression) {
         visitorParent = expression
         visitorParam = "loop"
+        ownsChildren = false
 
         parent(expression)
 

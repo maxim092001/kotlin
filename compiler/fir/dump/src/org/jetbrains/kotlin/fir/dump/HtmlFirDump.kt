@@ -1595,7 +1595,7 @@ class HtmlFirDump internal constructor(private var linkResolver: FirLinkResolver
 
         +"?."
 
-        val nestedQualifier = safeCallExpression.regularQualifiedAccess
+        val nestedQualifier = safeCallExpression.selector
         if (nestedQualifier.explicitReceiver == safeCallExpression.checkedSubjectRef.value) {
             when (nestedQualifier) {
                 is FirFunctionCall -> {

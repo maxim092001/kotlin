@@ -8,7 +8,6 @@ package org.jetbrains.kotlin.ir.backend.js.transformers.irToJs
 import org.jetbrains.kotlin.backend.common.compilationException
 import org.jetbrains.kotlin.ir.expressions.IrCall
 import org.jetbrains.kotlin.ir.backend.js.utils.JsGenerationContext
-import org.jetbrains.kotlin.ir.backend.js.utils.emptyScope
 import org.jetbrains.kotlin.ir.backend.js.utils.getJsFunAnnotation
 import org.jetbrains.kotlin.js.backend.ast.*
 
@@ -16,40 +15,9 @@ class FunctionWithJsFuncAnnotationInliner(private val jsFuncCall: IrCall, privat
     private val function = getJsFunctionImplementation()
     private val replacements = collectReplacementsForCall()
 
-    fun generateStatement(): JsStatement {
-        val statements = function.body.statements.replaceDeclaredParameterWithActual()
-        return when (statements.size) {
-            0 -> JsEmpty
-            1 -> statements.single().withSource(jsFuncCall, context)
-            // TODO: use transparent block (e.g. JsCompositeBlock)
-            else -> JsBlock(statements)
-        }
-    }
-
-    fun generateExpression(): JsExpression {
-        val statements = function.body.statements.replaceDeclaredParameterWithActual()
-
-        if (statements.isEmpty()) return JsPrefixOperation(JsUnaryOperator.VOID, JsIntLiteral(3)) // TODO: report warning or even error
-
-        val lastStatement = statements.last()
-        if (statements.size == 1) {
-            if (lastStatement is JsExpressionStatement) return lastStatement.expression.withSource(jsFuncCall, context)
-        }
-
-        val newStatements = statements.toMutableList()
-
-        when (lastStatement) {
-            is JsReturn -> {
-            }
-            is JsExpressionStatement -> {
-                newStatements[statements.lastIndex] = JsReturn(lastStatement.expression)
-            }
-            // TODO: report warning or even error
-            else -> newStatements += JsReturn(JsPrefixOperation(JsUnaryOperator.VOID, JsIntLiteral(3)))
-        }
-
-        val syntheticFunction = JsFunction(emptyScope, JsBlock(newStatements), "")
-        return JsInvocation(syntheticFunction).withSource(jsFuncCall, context)
+    fun generateResultStatement(): List<JsStatement> {
+        return function.body.statements
+            .apply { SimpleJsCodeInliner(replacements).acceptList(this) }
     }
 
     private fun getJsFunctionImplementation(): JsFunction {
@@ -67,10 +35,6 @@ class FunctionWithJsFuncAnnotationInliner(private val jsFuncCall: IrCall, privat
         return function.parameters
             .mapIndexed { i, param -> param.name to translatedArguments[i] }
             .toMap()
-    }
-
-    private fun List<JsStatement>.replaceDeclaredParameterWithActual(): List<JsStatement> {
-        return apply { SimpleJsCodeInliner(replacements).acceptList(this) }
     }
 }
 

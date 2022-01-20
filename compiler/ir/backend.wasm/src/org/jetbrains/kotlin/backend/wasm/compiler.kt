@@ -106,7 +106,11 @@ fun WasmCompiledModuleFragment.generateJs(): String {
 
         println(valueAddr) {
             console.log(">>>  " + importStringFromWasm(valueAddr));
-        }
+        },
+        
+        printError(valueAddr) {
+            console.error(">>>  " + importStringFromWasm(valueAddr));
+        },
     };
     
     function importStringFromWasm(addr) {

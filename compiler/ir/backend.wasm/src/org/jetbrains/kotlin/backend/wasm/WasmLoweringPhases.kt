@@ -508,6 +508,12 @@ private val removeInitializersForLazyProperties = makeWasmModulePhase(
     description = "Remove property initializers if they was initialized lazily"
 )
 
+private val unhandledExceptionLowering = makeWasmModulePhase(
+    ::UnhandledExceptionLowering,
+    name = "UnhandledExceptionLowering",
+    description = "Transforms try/catch statements into canonical form supported by the wasm codegen",
+)
+
 private val propertyAccessorInlinerLoweringPhase = makeWasmModulePhase(
     ::PropertyAccessorInlineLowering,
     name = "PropertyAccessorInlineLowering",
@@ -585,6 +591,8 @@ val wasmPhases = NamedCompilerPhase(
             addContinuationToNonLocalSuspendFunctionsLoweringPhase then
             addContinuationToFunctionCallsLoweringPhase then
             addMainFunctionCallsLowering then
+
+            unhandledExceptionLowering then
 
             tryCatchCanonicalization then
             returnableBlockLoweringPhase then

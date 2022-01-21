@@ -21,7 +21,7 @@ public open class Throwable(open val message: String?, open val cause: kotlin.Th
 
     constructor() : this(null, null)
 
-    private val jsStack: ExternalInterfaceType = captureStackTrace()
+    internal val jsStack: ExternalInterfaceType = captureStackTrace()
 
     internal val stack: String by lazy {
         jsToKotlinStringAdapter(jsStack)

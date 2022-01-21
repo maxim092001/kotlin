@@ -192,15 +192,8 @@ abstract class BasicWasmBoxTest(
             const wasmBinary = read(String.raw`${outputWasmFile.absoluteFile}`, 'binary');
             const wasmModule = new WebAssembly.Module(wasmBinary);
             wasmInstance = new WebAssembly.Instance(wasmModule, { runtime, js_code });
-            wasmInstance.exports.__init();
-
             const ${sanitizeName(config.moduleId)} = wasmInstance.exports;
-            
-            wasmInstance.exports.startUnitTests?.();
-
-            const actualResult = wasmInstance.exports.$testFunction();
-            if (actualResult !== "OK")
-                throw `Wrong box result '${'$'}{actualResult}'; Expected "OK"`;
+            ${createJsRun(wasmInstance = "wasmInstance", testFunction = testFunction)}
         """.trimIndent()
 
         outputJsFile.write(compilerResult.js + "\n" + testRunner)
@@ -210,18 +203,30 @@ abstract class BasicWasmBoxTest(
         }
     }
 
+    private fun createJsRun(wasmInstance: String, testFunction: String) = """
+            let actualResult
+            try {
+                $wasmInstance.exports.__init();
+                $wasmInstance.exports.startUnitTests?.();
+                actualResult = $wasmInstance.exports.$testFunction();
+            } catch(e) {
+                console.log('Failed with exception!')
+                console.log('Message: ' + e.message)
+                console.log('Name:    ' + e.name)
+                console.log('Stack:')
+                console.log(e.stack)
+            }
+            if (actualResult !== "OK")
+                throw `Wrong box result '${'$'}{actualResult}'; Expected "OK"`;
+    """.trimIndent()
+
     private fun createDirectoryToRunInBrowser(directory: File, compilerResult: WasmCompilerResult) {
         val browserRunner =
             """
             const response = await fetch("index.wasm");
             const wasmBinary = await response.arrayBuffer();
             wasmInstance = (await WebAssembly.instantiate(wasmBinary, { runtime, js_code })).instance;
-            wasmInstance.exports.__init();
-            wasmInstance.exports.startUnitTests?.();
-
-            const actualResult = wasmInstance.exports.box();
-            if (actualResult !== "OK")
-                throw `Wrong box result '${'$'}{actualResult}'; Expected "OK"`;
+            ${createJsRun(wasmInstance = "wasmInstance", testFunction = "box")}
             console.log("Test passed!");    
             """.trimIndent()
 

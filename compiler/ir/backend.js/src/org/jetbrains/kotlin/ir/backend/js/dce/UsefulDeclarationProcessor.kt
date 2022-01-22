@@ -134,10 +134,8 @@ abstract class UsefulDeclarationProcessor(
             }
 
             if (irClass.isObject && isExported(irClass)) {
-                irClass.inEnclosingDeclaration {
-                    context.mapping.objectToGetInstanceFunction[irClass]
-                        ?.enqueue("Exported object getInstance function")
-                }
+                context.mapping.objectToGetInstanceFunction[irClass]
+                    ?.enqueue("Exported object getInstance function")
             }
 
             irClass.annotations.forEach {

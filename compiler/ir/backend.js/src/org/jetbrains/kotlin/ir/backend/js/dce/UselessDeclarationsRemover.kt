@@ -8,7 +8,6 @@ package org.jetbrains.kotlin.ir.backend.js.dce
 import org.jetbrains.kotlin.ir.visitors.IrElementVisitorVoid
 import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
-import org.jetbrains.kotlin.ir.backend.js.JsCommonBackendContext
 import org.jetbrains.kotlin.ir.backend.js.JsIrBackendContext
 import org.jetbrains.kotlin.ir.backend.js.ir.JsIrBuilder
 import org.jetbrains.kotlin.ir.backend.js.utils.*
@@ -22,7 +21,7 @@ import org.jetbrains.kotlin.js.config.RuntimeDiagnostic
 class UselessDeclarationsRemover(
     private val removeUnusedAssociatedObjects: Boolean,
     private val usefulDeclarations: Set<IrDeclaration>,
-    private val context: JsCommonBackendContext,
+    private val context: JsIrBackendContext,
     private val dceRuntimeDiagnostic: RuntimeDiagnostic?,
 ) : IrElementVisitorVoid {
     override fun visitElement(element: IrElement) {
@@ -85,7 +84,7 @@ class UselessDeclarationsRemover(
 
     private fun IrFunction.processFunctionWithDiagnostic(dceRuntimeDiagnostic: RuntimeDiagnostic) {
         val isRemovingBody = dceRuntimeDiagnostic.removingBody()
-        val targetMethod = dceRuntimeDiagnostic.unreachableDeclarationMethod(context as JsIrBackendContext)
+        val targetMethod = dceRuntimeDiagnostic.unreachableDeclarationMethod(context)
         val call = JsIrBuilder.buildCall(
             target = targetMethod,
             type = targetMethod.owner.returnType

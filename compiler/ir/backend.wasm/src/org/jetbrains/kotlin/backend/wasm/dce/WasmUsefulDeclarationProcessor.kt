@@ -26,7 +26,7 @@ internal class WasmUsefulDeclarationProcessor(
     private val unitGetInstance: IrSimpleFunction = context.findUnitGetInstanceFunction()
 
     override val bodyVisitor: BodyVisitorBase = object : BodyVisitorBase() {
-        override fun <T> visitConst(expression: IrConst<T>) = when (expression.kind) {
+        override fun visitConst(expression: IrConst<*>) = when (expression.kind) {
             is IrConstKind.Null -> expression.type.enqueueType("expression type")
             is IrConstKind.String -> context.wasmSymbols.stringGetLiteral.owner
                 .enqueue("String literal intrinsic getter stringGetLiteral")
@@ -40,17 +40,14 @@ internal class WasmUsefulDeclarationProcessor(
                     val backingField = call.getTypeArgument(1)
                         ?.let { context.inlineClassesUtils.getInlinedClass(it) }
                         ?.let { getInlineClassBackingField(it) }
-                    if (backingField != null) {
-                        backingField.parentAsClass.enqueue("type for unboxIntrinsic")
-                        backingField.enqueue("backing inline class field for unboxIntrinsic")
-                    }
+                    backingField?.enqueue("backing inline class field for unboxIntrinsic")
                 }
                 true
             }
             context.wasmSymbols.wasmClassId,
             context.wasmSymbols.wasmInterfaceId,
             context.wasmSymbols.wasmRefCast -> {
-                call.getTypeArgument(0)?.getClass()?.symbol?.owner?.enqueue("generic intrinsic ${call.symbol.owner.name}")
+                call.getTypeArgument(0)?.getClass()?.enqueue("generic intrinsic ${call.symbol.owner.name}")
                 true
             }
             else -> false
@@ -67,7 +64,7 @@ internal class WasmUsefulDeclarationProcessor(
                 when (op.immediates.size) {
                     0 -> {
                         if (op == WasmOp.REF_TEST) {
-                            call.getTypeArgument(0)?.getRuntimeClass?.enqueue("REF_TEST")
+                            call.getTypeArgument(0)?.enqueueRuntimeClassOrAny("REF_TEST")
                         }
                     }
                     1 -> {
@@ -85,18 +82,13 @@ internal class WasmUsefulDeclarationProcessor(
             super.visitCall(expression)
 
             if (expression.symbol == context.wasmSymbols.boxIntrinsic) {
-                expression.getTypeArgument(0)?.getRuntimeClass?.enqueue("boxIntrinsic")
-                return
-            }
-
-            if (expression.symbol == unitGetInstance.symbol) {
-                unitGetInstance.enqueue("unitGetInstance")
+                expression.getTypeArgument(0)?.enqueueRuntimeClassOrAny("boxIntrinsic")
                 return
             }
 
             val function: IrFunction = expression.symbol.owner.realOverrideTarget
             if (function.returnType == context.irBuiltIns.unitType) {
-                unitGetInstance.enqueue("unitGetInstance")
+                unitGetInstance.enqueue("function Unit return type")
             }
 
             if (tryToProcessIntrinsicCall(expression)) return
@@ -106,13 +98,12 @@ internal class WasmUsefulDeclarationProcessor(
             if (function is IrSimpleFunction && function.isOverridable && !isSuperCall) {
                 val klass = function.parentAsClass
                 if (!klass.isInterface) {
-                    context.wasmSymbols.getVirtualMethodId.owner.enqueue("getVirtualMethodId")
-                    function.symbol.owner.enqueue("referenceFunctionType")
+                    context.wasmSymbols.getVirtualMethodId.owner.enqueue("call on class receiver")
                 } else {
-                    klass.symbol.owner.enqueue("referenceInterfaceId")
-                    context.wasmSymbols.getInterfaceImplId.owner.enqueue("getInterfaceImplId")
-                    function.symbol.owner.enqueue("referenceInterfaceTable and referenceFunctionType")
+                    klass.enqueue("receiver class")
+                    context.wasmSymbols.getInterfaceImplId.owner.enqueue("call on interface receiver")
                 }
+                function.enqueue("method call")
             }
         }
     }
@@ -213,8 +204,9 @@ internal class WasmUsefulDeclarationProcessor(
 
     override fun processConstructor(irConstructor: IrConstructor) {
         super.processConstructor(irConstructor)
-        if (context.inlineClassesUtils.isClassInlineLike(irConstructor.parentAsClass)) return
-        processIrFunction(irConstructor)
+        if (!context.inlineClassesUtils.isClassInlineLike(irConstructor.parentAsClass)) {
+            processIrFunction(irConstructor)
+        }
     }
 
     override fun isExported(declaration: IrDeclaration): Boolean = declaration.isJsExport()

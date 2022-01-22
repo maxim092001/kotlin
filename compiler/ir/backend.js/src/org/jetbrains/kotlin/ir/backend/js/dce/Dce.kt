@@ -76,7 +76,6 @@ private fun IrDeclaration.addRootsTo(
 }
 
 private fun buildRoots(modules: Iterable<IrModuleFragment>, context: JsIrBackendContext): List<IrDeclaration> = buildList {
-
     val nestedDeclarationsVisitor = object : IrElementVisitorVoid {
         override fun visitElement(element: IrElement): Unit = element.acceptChildrenVoid(this)
         override fun visitBody(body: IrBody): Unit = Unit // Skip

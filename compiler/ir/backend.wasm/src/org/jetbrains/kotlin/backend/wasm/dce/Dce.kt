@@ -7,11 +7,9 @@ package org.jetbrains.kotlin.backend.wasm.dce
 
 import org.jetbrains.kotlin.backend.wasm.WasmBackendContext
 import org.jetbrains.kotlin.ir.IrElement
-import org.jetbrains.kotlin.ir.backend.js.dce.UselessDeclarationsRemover
 import org.jetbrains.kotlin.ir.backend.js.utils.*
 import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.expressions.IrBody
-import org.jetbrains.kotlin.ir.util.*
 import org.jetbrains.kotlin.ir.visitors.IrElementVisitorVoid
 import org.jetbrains.kotlin.ir.visitors.acceptChildrenVoid
 import org.jetbrains.kotlin.ir.visitors.acceptVoid
@@ -27,25 +25,7 @@ internal fun eliminateDeadDeclarations(modules: List<IrModuleFragment>, context:
         printReachabilityInfo = printReachabilityInfo
     ).collectDeclarations(rootDeclarations = buildRoots(modules, context))
 
-    removeUnusedDeclarations(
-        context = context,
-        modules = modules,
-        usefulDeclarations = usefulDeclarations
-    )
-}
-
-private fun removeUnusedDeclarations(
-    context: WasmBackendContext,
-    modules: List<IrModuleFragment>,
-    usefulDeclarations: Set<IrDeclaration>
-) {
-    val remover = UselessDeclarationsRemover(
-        removeUnusedAssociatedObjects = false,
-        usefulDeclarations = usefulDeclarations,
-        context = context,
-        dceRuntimeDiagnostic = null,
-    )
-
+    val remover = WasmUselessDeclarationsRemover(usefulDeclarations)
     modules.onAllFiles {
         acceptVoid(remover)
     }

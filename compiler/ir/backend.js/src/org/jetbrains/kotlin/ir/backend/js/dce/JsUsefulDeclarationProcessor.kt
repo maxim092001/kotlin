@@ -29,8 +29,8 @@ internal class JsUsefulDeclarationProcessor(
     removeUnusedAssociatedObjects: Boolean
 ) : UsefulDeclarationProcessor(printReachabilityInfo, removeUnusedAssociatedObjects) {
 
-    private val equalsMethod get() = getMethodOfAny("equals")
-    private val hashCodeMethod get() = getMethodOfAny("hashCode")
+    private val equalsMethod = getMethodOfAny("equals")
+    private val hashCodeMethod = getMethodOfAny("hashCode")
 
     override val bodyVisitor: BodyVisitorBase = object : BodyVisitorBase() {
         override fun visitCall(expression: IrCall) {

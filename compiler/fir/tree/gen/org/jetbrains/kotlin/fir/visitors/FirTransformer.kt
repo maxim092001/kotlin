@@ -91,6 +91,7 @@ import org.jetbrains.kotlin.fir.declarations.FirErrorProperty
 import org.jetbrains.kotlin.fir.expressions.FirQualifiedAccessExpression
 import org.jetbrains.kotlin.fir.expressions.FirPropertyAccessExpression
 import org.jetbrains.kotlin.fir.expressions.FirFunctionCall
+import org.jetbrains.kotlin.fir.expressions.FirIntegerLiteralOperatorCall
 import org.jetbrains.kotlin.fir.expressions.FirImplicitInvokeCall
 import org.jetbrains.kotlin.fir.expressions.FirDelegatedConstructorCall
 import org.jetbrains.kotlin.fir.expressions.FirComponentCall
@@ -489,6 +490,10 @@ abstract class FirTransformer<in D> : FirVisitor<FirElement, D>() {
 
     open fun transformFunctionCall(functionCall: FirFunctionCall, data: D): FirStatement {
         return transformElement(functionCall, data)
+    }
+
+    open fun transformIntegerLiteralOperatorCall(integerLiteralOperatorCall: FirIntegerLiteralOperatorCall, data: D): FirStatement {
+        return transformElement(integerLiteralOperatorCall, data)
     }
 
     open fun transformImplicitInvokeCall(implicitInvokeCall: FirImplicitInvokeCall, data: D): FirStatement {
@@ -1033,6 +1038,10 @@ abstract class FirTransformer<in D> : FirVisitor<FirElement, D>() {
 
     final override fun visitFunctionCall(functionCall: FirFunctionCall, data: D): FirStatement {
         return transformFunctionCall(functionCall, data)
+    }
+
+    final override fun visitIntegerLiteralOperatorCall(integerLiteralOperatorCall: FirIntegerLiteralOperatorCall, data: D): FirStatement {
+        return transformIntegerLiteralOperatorCall(integerLiteralOperatorCall, data)
     }
 
     final override fun visitImplicitInvokeCall(implicitInvokeCall: FirImplicitInvokeCall, data: D): FirStatement {

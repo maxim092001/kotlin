@@ -15,6 +15,7 @@ import org.jetbrains.kotlin.fir.diagnostics.*
 import org.jetbrains.kotlin.fir.expressions.*
 import org.jetbrains.kotlin.fir.expressions.builder.buildErrorExpression
 import org.jetbrains.kotlin.fir.expressions.builder.buildFunctionCall
+import org.jetbrains.kotlin.fir.expressions.builder.buildIntegerLiteralOperatorCall
 import org.jetbrains.kotlin.fir.expressions.builder.buildVariableAssignment
 import org.jetbrains.kotlin.fir.expressions.impl.FirResolvedArgumentList
 import org.jetbrains.kotlin.fir.expressions.impl.toAnnotationArgumentMapping
@@ -31,6 +32,7 @@ import org.jetbrains.kotlin.fir.resolve.inference.FirStubInferenceSession
 import org.jetbrains.kotlin.fir.resolve.substitution.ConeSubstitutor
 import org.jetbrains.kotlin.fir.resolve.transformers.InvocationKindTransformer
 import org.jetbrains.kotlin.fir.resolve.transformers.StoreReceiver
+import org.jetbrains.kotlin.fir.symbols.impl.FirNamedFunctionSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirVariableSymbol
 import org.jetbrains.kotlin.fir.types.*
 import org.jetbrains.kotlin.fir.types.builder.buildErrorTypeRef
@@ -374,14 +376,36 @@ open class FirExpressionsResolveTransformer(transformer: FirBodyResolveTransform
             } catch (e: Throwable) {
                 throw RuntimeException("While resolving call ${functionCall.render()}", e)
             }
-
-        dataFlowAnalyzer.exitFunctionCall(completeInference, callCompleted)
+        val result = completeInference.transformToIntegerOperatorCallIfNeeded()
+        dataFlowAnalyzer.exitFunctionCall(result, callCompleted)
         if (callCompleted) {
             if (enableArrayOfCallTransformation) {
-                return arrayOfCallTransformer.transformFunctionCall(completeInference, null)
+                return arrayOfCallTransformer.transformFunctionCall(result, null)
             }
         }
-        return completeInference
+        return result
+    }
+
+    private fun FirFunctionCall.transformToIntegerOperatorCallIfNeeded(): FirFunctionCall {
+        if (origin != FirFunctionCallOrigin.Operator) return this
+        if (!explicitReceiver.isIntegerLiteralOrOperator()) return this
+        val resolvedSymbol = calleeReference.resolvedSymbol as? FirNamedFunctionSymbol ?: return this
+        val argument = this.argumentList.arguments.singleOrNull() ?: return this
+        if (!argument.isIntegerLiteralOrOperator()) return this
+        if (resolvedSymbol.callableId !in ConvertibleIntegerOperators.operators) return this
+        val original = this
+        return buildIntegerLiteralOperatorCall {
+            source = original.source
+            typeRef = original.typeRef
+            annotations.addAll(original.annotations)
+            typeArguments.addAll(original.typeArguments)
+            explicitReceiver = original.explicitReceiver
+            dispatchReceiver = original.dispatchReceiver
+            extensionReceiver = original.extensionReceiver
+            argumentList = original.argumentList
+            calleeReference = original.calleeReference
+            origin = original.origin
+        }
     }
 
     override fun transformBlock(block: FirBlock, data: ResolutionMode): FirStatement {

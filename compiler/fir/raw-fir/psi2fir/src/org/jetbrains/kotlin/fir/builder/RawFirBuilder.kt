@@ -1748,9 +1748,11 @@ open class RawFirBuilder(
                         }
                     }
                 }
-                is KtIntersectionType -> FirErrorTypeRefBuilder().apply {
+                //TODO: probably DNN should be checked somehow
+                is KtIntersectionType -> FirDefinitelyNotNullTypeRefBuilder().apply {
                     this.source = source
-                    diagnostic = ConeSimpleDiagnostic("Intersection types are not supported yet", DiagnosticKind.Syntax)
+                    //Null checks? diagnostics?
+                    type = unwrappedElement.getLeftTypeRef()!!.toFirOrErrorType()
                 }
                 null -> FirErrorTypeRefBuilder().apply {
                     this.source = source

@@ -135,6 +135,7 @@ import org.jetbrains.kotlin.fir.types.FirTypeRefWithNullability
 import org.jetbrains.kotlin.fir.types.FirUserTypeRef
 import org.jetbrains.kotlin.fir.types.FirDynamicTypeRef
 import org.jetbrains.kotlin.fir.types.FirFunctionTypeRef
+import org.jetbrains.kotlin.fir.types.FirDefinitelyNotNullTypeRef
 import org.jetbrains.kotlin.fir.types.FirImplicitTypeRef
 import org.jetbrains.kotlin.fir.contracts.FirEffectDeclaration
 import org.jetbrains.kotlin.fir.contracts.FirContractDescription
@@ -665,6 +666,10 @@ abstract class FirTransformer<in D> : FirVisitor<FirElement, D>() {
 
     open fun transformFunctionTypeRef(functionTypeRef: FirFunctionTypeRef, data: D): FirTypeRef {
         return transformElement(functionTypeRef, data)
+    }
+
+    open fun transformDefinitelyNotNullTypeRef(definitelyNotNullTypeRef: FirDefinitelyNotNullTypeRef, data: D): FirTypeRef {
+        return transformElement(definitelyNotNullTypeRef, data)
     }
 
     open fun transformImplicitTypeRef(implicitTypeRef: FirImplicitTypeRef, data: D): FirTypeRef {
@@ -1209,6 +1214,10 @@ abstract class FirTransformer<in D> : FirVisitor<FirElement, D>() {
 
     final override fun visitFunctionTypeRef(functionTypeRef: FirFunctionTypeRef, data: D): FirTypeRef {
         return transformFunctionTypeRef(functionTypeRef, data)
+    }
+
+    final override fun visitDefinitelyNotNullTypeRef(definitelyNotNullTypeRef: FirDefinitelyNotNullTypeRef, data: D): FirTypeRef {
+        return transformDefinitelyNotNullTypeRef(definitelyNotNullTypeRef, data)
     }
 
     final override fun visitImplicitTypeRef(implicitTypeRef: FirImplicitTypeRef, data: D): FirTypeRef {

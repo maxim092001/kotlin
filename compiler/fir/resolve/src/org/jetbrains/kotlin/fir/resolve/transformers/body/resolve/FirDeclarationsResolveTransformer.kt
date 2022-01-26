@@ -820,6 +820,7 @@ open class FirDeclarationsResolveTransformer(transformer: FirBodyResolveTransfor
         // To separate function and separate commit
         val writer = FirCallCompletionResultsWriterTransformer(
             session,
+            components.scopeSession,
             ConeSubstitutor.Empty,
             components.returnTypeCalculator,
             session.typeApproximator,

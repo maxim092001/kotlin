@@ -88,6 +88,7 @@ object CheckExtensionReceiver : ResolutionStage() {
             candidate.csBuilder,
             argumentExtensionReceiverValue.receiverExpression,
             argumentType = argumentType,
+            parameter = null,
             expectedType = expectedType,
             sink = sink,
             context = context,

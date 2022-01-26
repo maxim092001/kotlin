@@ -18,29 +18,27 @@ import org.jetbrains.kotlin.fir.declarations.utils.visibility
 import org.jetbrains.kotlin.fir.diagnostics.ConeSimpleDiagnostic
 import org.jetbrains.kotlin.fir.diagnostics.DiagnosticKind
 import org.jetbrains.kotlin.fir.expressions.*
+import org.jetbrains.kotlin.fir.expressions.builder.buildFunctionCall
 import org.jetbrains.kotlin.fir.expressions.impl.FirPropertyAccessExpressionImpl
 import org.jetbrains.kotlin.fir.references.FirNamedReference
 import org.jetbrains.kotlin.fir.references.builder.buildErrorNamedReference
 import org.jetbrains.kotlin.fir.references.builder.buildResolvedCallableReference
 import org.jetbrains.kotlin.fir.references.builder.buildResolvedNamedReference
+import org.jetbrains.kotlin.fir.resolve.*
 import org.jetbrains.kotlin.fir.resolve.calls.Candidate
 import org.jetbrains.kotlin.fir.resolve.calls.FirErrorReferenceWithCandidate
 import org.jetbrains.kotlin.fir.resolve.calls.FirNamedReferenceWithCandidate
-import org.jetbrains.kotlin.fir.resolve.constructFunctionalTypeRef
-import org.jetbrains.kotlin.fir.resolve.createFunctionalType
 import org.jetbrains.kotlin.fir.resolve.dfa.FirDataFlowAnalyzer
-import org.jetbrains.kotlin.fir.resolve.diagnostics.ConeConstraintSystemHasContradiction
-import org.jetbrains.kotlin.fir.resolve.diagnostics.ConeInapplicableCandidateError
-import org.jetbrains.kotlin.fir.resolve.diagnostics.ConePropertyAsOperator
-import org.jetbrains.kotlin.fir.resolve.diagnostics.ConeTypeParameterInQualifiedAccess
-import org.jetbrains.kotlin.fir.resolve.inference.*
-import org.jetbrains.kotlin.fir.resolve.propagateTypeFromQualifiedAccessAfterNullCheck
+import org.jetbrains.kotlin.fir.resolve.diagnostics.*
+import org.jetbrains.kotlin.fir.resolve.inference.ResolvedLambdaAtom
 import org.jetbrains.kotlin.fir.resolve.providers.firProvider
 import org.jetbrains.kotlin.fir.resolve.substitution.ConeSubstitutor
 import org.jetbrains.kotlin.fir.resolve.transformers.body.resolve.FirArrayOfCallTransformer
 import org.jetbrains.kotlin.fir.resolve.transformers.body.resolve.remapArgumentsWithVararg
 import org.jetbrains.kotlin.fir.resolve.transformers.body.resolve.resultType
 import org.jetbrains.kotlin.fir.resolve.transformers.body.resolve.writeResultType
+import org.jetbrains.kotlin.fir.scopes.FakeOverrideTypeCalculator
+import org.jetbrains.kotlin.fir.scopes.getFunctions
 import org.jetbrains.kotlin.fir.scopes.impl.FirIntegerOperatorCall
 import org.jetbrains.kotlin.fir.symbols.FirBasedSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirConstructorSymbol
@@ -55,6 +53,7 @@ import org.jetbrains.kotlin.fir.types.impl.ConeTypeParameterTypeImpl
 import org.jetbrains.kotlin.fir.visitors.FirDefaultTransformer
 import org.jetbrains.kotlin.fir.visitors.FirTransformer
 import org.jetbrains.kotlin.fir.visitors.transformSingle
+import org.jetbrains.kotlin.name.StandardClassIds
 import org.jetbrains.kotlin.resolve.calls.tower.CandidateApplicability
 import org.jetbrains.kotlin.resolve.calls.tower.isSuccess
 import org.jetbrains.kotlin.types.TypeApproximatorConfiguration
@@ -65,6 +64,7 @@ import kotlin.collections.component2
 
 class FirCallCompletionResultsWriterTransformer(
     override val session: FirSession,
+    private val scopeSession: ScopeSession,
     private val finalSubstitutor: ConeSubstitutor,
     private val typeCalculator: ReturnTypeCalculator,
     private val typeApproximator: ConeTypeApproximator,
@@ -219,6 +219,14 @@ class FirCallCompletionResultsWriterTransformer(
                     subCandidate.handleVarargs()
                     subCandidate.argumentMapping?.let {
                         val newArgumentList = buildResolvedArgumentList(it, source = functionCall.argumentList.source)
+                        if (subCandidate.parametersWithIntToLongConversion.isNotEmpty()) {
+                            val argumentsWithConversion = subCandidate.parametersWithIntToLongConversion
+                                .mapNotNullTo(mutableSetOf()) { parameter ->
+                                    newArgumentList.mapping.entries.firstOrNull { it.value == parameter }?.key
+                                }
+                            val transformer = IntToLongConversionTransformer(argumentsWithConversion)
+                            newArgumentList.transformArguments(transformer, null)
+                        }
                         val symbol = subCandidate.symbol
                         val functionIsInline =
                             (symbol as? FirNamedFunctionSymbol)?.fir?.isInline == true || symbol.isArrayConstructorWithLambda
@@ -257,6 +265,38 @@ class FirCallCompletionResultsWriterTransformer(
         }
 
         return result
+    }
+
+    private inner class IntToLongConversionTransformer(val argumentsWithConversion: Set<FirExpression>) : FirTransformer<Nothing?>() {
+        override fun <E : FirElement> transformElement(element: E, data: Nothing?): E {
+            @Suppress("UNCHECKED_CAST")
+            if (element is FirExpression && element in argumentsWithConversion) {
+                return buildFunctionCall {
+                    source = element.source?.fakeElement(KtFakeSourceElementKind.IntToLongConversion)
+                    typeRef = session.builtinTypes.longType
+                    explicitReceiver = element
+                    dispatchReceiver = element
+
+                    val name = StandardClassIds.Callables.intToLong.callableName
+                    val toLongSymbol = session.builtinTypes.intType.coneType
+                        .scope(session, scopeSession, FakeOverrideTypeCalculator.DoNothing)
+                        ?.getFunctions(name)
+                        ?.singleOrNull()
+
+                    calleeReference = if (toLongSymbol != null) {
+                        buildResolvedNamedReference {
+                            this.name = name
+                            resolvedSymbol = toLongSymbol
+                        }
+                    } else {
+                        buildErrorNamedReference {
+                            diagnostic = ConeUnresolvedReferenceError(name)
+                        }
+                    }
+                } as E
+            }
+            return element
+        }
     }
 
     private val FirBasedSymbol<*>.isArrayConstructorWithLambda: Boolean

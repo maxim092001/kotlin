@@ -182,6 +182,7 @@ class PostponedArgumentsAnalyzer(
                 candidate.resolveArgumentExpression(
                     c.getBuilder(),
                     it,
+                    parameter = null,
                     lambdaReturnType,
                     lambda.atom.returnTypeRef, // TODO: proper ref
                     checkerSink,

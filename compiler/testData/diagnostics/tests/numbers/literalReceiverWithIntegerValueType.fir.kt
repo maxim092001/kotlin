@@ -42,11 +42,11 @@ fun testByteDotCall(c3: C<Byte>) {
 }
 
 fun testLongOperatorInfixCall(c4: C<Long>) {
-    c4.takeT(<!ARGUMENT_TYPE_MISMATCH!>1 + 2<!>)
-    c4.takeT(<!ARGUMENT_TYPE_MISMATCH!>1 - 2<!>)
-    c4.takeT(<!ARGUMENT_TYPE_MISMATCH!>1 * 2<!>)
-    c4.takeT(<!ARGUMENT_TYPE_MISMATCH!>1 / 2<!>)
-    c4.takeT(<!ARGUMENT_TYPE_MISMATCH!>1 % 2<!>)
+    c4.takeT(1 + 2)
+    c4.takeT(1 - 2)
+    c4.takeT(1 * 2)
+    c4.takeT(1 / 2)
+    c4.takeT(1 % 2)
     c4.takeT(+1)
     c4.takeT(-1)
     c4.takeT(<!ARGUMENT_TYPE_MISMATCH!>1 shl 2<!>)

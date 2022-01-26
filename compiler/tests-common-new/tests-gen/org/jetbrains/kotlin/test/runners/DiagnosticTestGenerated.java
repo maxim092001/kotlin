@@ -4946,6 +4946,12 @@ public class DiagnosticTestGenerated extends AbstractDiagnosticTest {
                 KtTestUtil.assertAllTestsPresentByMetadataWithExcluded(this.getClass(), new File("compiler/testData/diagnostics/tests/constantEvaluator"), Pattern.compile("^(.*)\\.kts?$"), Pattern.compile("^(.+)\\.fir\\.kts?$"), true);
             }
 
+            @Test
+            @TestMetadata("intToLongConversion.kt")
+            public void testIntToLongConversion() throws Exception {
+                runTest("compiler/testData/diagnostics/tests/constantEvaluator/intToLongConversion.kt");
+            }
+
             @Nested
             @TestMetadata("compiler/testData/diagnostics/tests/constantEvaluator/constant")
             @TestDataPath("$PROJECT_ROOT")

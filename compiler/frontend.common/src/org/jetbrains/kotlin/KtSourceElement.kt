@@ -188,6 +188,10 @@ sealed class KtFakeSourceElementKind : KtSourceElementKind() {
     // with a fake source that refers to the value parameter in the function type notation
     // e.g., `(x: Int) -> Unit` becomes `Function1<@ParameterName("x") Int, Unit>`
     object ParameterNameAnnotationCall : KtFakeSourceElementKind()
+
+    // for widening conversion from int to long for int literals and operators on them
+    // e.g. takeLong(1 + 1) -> takeLong(intToLongConversion(1 + 1))
+    object IntToLongConversion : KtFakeSourceElementKind()
 }
 
 sealed class AbstractKtSourceElement {

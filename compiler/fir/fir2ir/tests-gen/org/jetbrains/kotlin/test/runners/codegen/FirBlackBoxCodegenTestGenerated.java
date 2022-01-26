@@ -8052,6 +8052,12 @@ public class FirBlackBoxCodegenTestGenerated extends AbstractFirBlackBoxCodegenT
         }
 
         @Test
+        @TestMetadata("intToLongConversion.kt")
+        public void testIntToLongConversion() throws Exception {
+            runTest("compiler/testData/codegen/box/constants/intToLongConversion.kt");
+        }
+
+        @Test
         @TestMetadata("kt9532.kt")
         public void testKt9532() throws Exception {
             runTest("compiler/testData/codegen/box/constants/kt9532.kt");

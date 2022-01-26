@@ -41,11 +41,11 @@ fun testByteUnaryOperators() {
 }
 
 fun testLongBinaryOperators() {
-    takeLong(<!ARGUMENT_TYPE_MISMATCH!>2 + 1<!>)
-    takeLong(<!ARGUMENT_TYPE_MISMATCH!>2 - 1<!>)
-    takeLong(<!ARGUMENT_TYPE_MISMATCH!>2 * 1<!>)
-    takeLong(<!ARGUMENT_TYPE_MISMATCH!>2 / 1<!>)
-    takeLong(<!ARGUMENT_TYPE_MISMATCH!>2 % 1<!>)
+    takeLong(2 + 1)
+    takeLong(2 - 1)
+    takeLong(2 * 1)
+    takeLong(2 / 1)
+    takeLong(2 % 1)
 
     takeLong(<!ARGUMENT_TYPE_MISMATCH!>2.plus(1)<!>)
     takeLong(<!ARGUMENT_TYPE_MISMATCH!>2.minus(1)<!>)

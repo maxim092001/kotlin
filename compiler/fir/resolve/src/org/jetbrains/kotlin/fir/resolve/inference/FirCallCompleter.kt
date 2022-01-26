@@ -60,9 +60,8 @@ class FirCallCompleter(
         expectedTypeMismatchIsReportedInChecker: Boolean = false,
     ): CompletionResult<T> where T : FirResolvable, T : FirStatement =
         completeCall(
-            call, expectedTypeRef, mayBeCoercionToUnitApplied = false, expectedTypeMismatchIsReportedInChecker, isFromCast = false
-        ,
-            shouldEnforceExpectedType = true,
+            call, expectedTypeRef, mayBeCoercionToUnitApplied = false, expectedTypeMismatchIsReportedInChecker,
+            isFromCast = false, shouldEnforceExpectedType = true,
         )
 
     fun <T> completeCall(call: T, data: ResolutionMode): CompletionResult<T> where T : FirResolvable, T : FirStatement =
@@ -123,7 +122,7 @@ class FirCallCompleter(
                         .buildAbstractResultingSubstitutor(session.typeContext) as ConeSubstitutor
                     val completedCall = call.transformSingle(
                         FirCallCompletionResultsWriterTransformer(
-                            session, finalSubstitutor, components.returnTypeCalculator,
+                            session, components.scopeSession, finalSubstitutor, components.returnTypeCalculator,
                             session.typeApproximator,
                             components.dataFlowAnalyzer,
                         ),
@@ -233,7 +232,7 @@ class FirCallCompleter(
         mode: FirCallCompletionResultsWriterTransformer.Mode = FirCallCompletionResultsWriterTransformer.Mode.Normal
     ): FirCallCompletionResultsWriterTransformer {
         return FirCallCompletionResultsWriterTransformer(
-            session, substitutor, components.returnTypeCalculator,
+            session, components.scopeSession, substitutor, components.returnTypeCalculator,
             session.typeApproximator,
             components.dataFlowAnalyzer,
             mode

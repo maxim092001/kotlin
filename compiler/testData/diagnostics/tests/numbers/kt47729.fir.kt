@@ -11,7 +11,7 @@ fun <A> takeGeneric(value : A) {}
 fun <A> takeGenericX(value : A?) {}
 
 fun test_1() {
-    takeLong(<!ARGUMENT_TYPE_MISMATCH!>1 + 1<!>) // ok
+    takeLong(1 + 1) // ok
     takeInt(1 + 1) // ok
     takeAny(1 + 1) // ok
     takeLongX(<!ARGUMENT_TYPE_MISMATCH!>1 + 1<!>) // ok

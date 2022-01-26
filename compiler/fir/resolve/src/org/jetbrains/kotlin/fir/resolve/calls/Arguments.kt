@@ -16,6 +16,7 @@ import org.jetbrains.kotlin.fir.resolve.ScopeSession
 import org.jetbrains.kotlin.fir.resolve.createFunctionalType
 import org.jetbrains.kotlin.fir.resolve.fullyExpandedType
 import org.jetbrains.kotlin.fir.resolve.inference.*
+import org.jetbrains.kotlin.fir.resolve.isIntegerLiteralOrOperator
 import org.jetbrains.kotlin.fir.resolve.transformers.body.resolve.resultType
 import org.jetbrains.kotlin.fir.resolve.transformers.ensureResolvedTypeDeclaration
 import org.jetbrains.kotlin.fir.returnExpressions
@@ -39,6 +40,7 @@ val SAM_LOOKUP_NAME = Name.special("<SAM-CONSTRUCTOR>")
 fun Candidate.resolveArgumentExpression(
     csBuilder: ConstraintSystemBuilder,
     argument: FirExpression,
+    parameter: FirValueParameter?,
     expectedType: ConeKotlinType?,
     expectedTypeRef: FirTypeRef?,
     sink: CheckerSink,
@@ -50,6 +52,7 @@ fun Candidate.resolveArgumentExpression(
         is FirFunctionCall, is FirWhenExpression, is FirTryExpression, is FirCheckNotNullCall, is FirElvisExpression -> resolveSubCallArgument(
             csBuilder,
             argument as FirResolvable,
+            parameter,
             expectedType,
             sink,
             context,
@@ -68,6 +71,7 @@ fun Candidate.resolveArgumentExpression(
                 resolveSubCallArgument(
                     csBuilder,
                     nestedQualifier,
+                    parameter,
                     expectedType,
                     sink,
                     context,
@@ -95,6 +99,7 @@ fun Candidate.resolveArgumentExpression(
                 resolvePlainExpressionArgument(
                     csBuilder,
                     argument,
+                    parameter,
                     expectedType,
                     sink,
                     context,
@@ -110,6 +115,7 @@ fun Candidate.resolveArgumentExpression(
         is FirWrappedArgumentExpression -> resolveArgumentExpression(
             csBuilder,
             argument.expression,
+            parameter,
             expectedType,
             expectedTypeRef,
             sink,
@@ -120,6 +126,7 @@ fun Candidate.resolveArgumentExpression(
         is FirBlock -> resolveBlockArgument(
             csBuilder,
             argument,
+            parameter,
             expectedType,
             expectedTypeRef,
             sink,
@@ -127,13 +134,14 @@ fun Candidate.resolveArgumentExpression(
             isReceiver,
             isDispatch
         )
-        else -> resolvePlainExpressionArgument(csBuilder, argument, expectedType, sink, context, isReceiver, isDispatch)
+        else -> resolvePlainExpressionArgument(csBuilder, argument, parameter, expectedType, sink, context, isReceiver, isDispatch)
     }
 }
 
 private fun Candidate.resolveBlockArgument(
     csBuilder: ConstraintSystemBuilder,
     block: FirBlock,
+    parameter: FirValueParameter?,
     expectedType: ConeKotlinType?,
     expectedTypeRef: FirTypeRef?,
     sink: CheckerSink,
@@ -160,6 +168,7 @@ private fun Candidate.resolveBlockArgument(
         resolveArgumentExpression(
             csBuilder,
             argument,
+            parameter,
             expectedType,
             expectedTypeRef,
             sink,
@@ -173,6 +182,7 @@ private fun Candidate.resolveBlockArgument(
 fun Candidate.resolveSubCallArgument(
     csBuilder: ConstraintSystemBuilder,
     argument: FirResolvable,
+    parameter: FirValueParameter?,
     expectedType: ConeKotlinType?,
     sink: CheckerSink,
     context: ResolutionContext,
@@ -184,6 +194,7 @@ fun Candidate.resolveSubCallArgument(
     val candidate = argument.candidate() ?: return resolvePlainExpressionArgument(
         csBuilder,
         argument,
+        parameter,
         expectedType,
         sink,
         context,
@@ -201,6 +212,7 @@ fun Candidate.resolveSubCallArgument(
         csBuilder,
         argument,
         argumentType,
+        parameter,
         expectedType,
         sink,
         context,
@@ -213,6 +225,7 @@ fun Candidate.resolveSubCallArgument(
 fun Candidate.resolvePlainExpressionArgument(
     csBuilder: ConstraintSystemBuilder,
     argument: FirExpression,
+    parameter: FirValueParameter?,
     expectedType: ConeKotlinType?,
     sink: CheckerSink,
     context: ResolutionContext,
@@ -227,6 +240,7 @@ fun Candidate.resolvePlainExpressionArgument(
         csBuilder,
         argument,
         argumentType,
+        parameter,
         expectedType,
         sink,
         context,
@@ -240,6 +254,7 @@ fun Candidate.resolvePlainArgumentType(
     csBuilder: ConstraintSystemBuilder,
     argument: FirExpression,
     argumentType: ConeKotlinType,
+    parameter: FirValueParameter?,
     expectedType: ConeKotlinType?,
     sink: CheckerSink,
     context: ResolutionContext,
@@ -266,6 +281,12 @@ fun Candidate.resolvePlainArgumentType(
             argumentTypeForApplicabilityCheck = it
             substitutor.substituteOrSelf(argumentTypeForApplicabilityCheck)
             usesSuspendConversion = true
+        }
+        if (parameter != null) {
+            argumentTypeForIntToLongConversion(argument, argumentType, expectedType)?.let {
+                argumentTypeForApplicabilityCheck = it
+                parametersWithIntToLongConversion += parameter
+            }
         }
     }
 
@@ -306,6 +327,16 @@ private fun argumentTypeWithSuspendConversion(
             isKFunctionType = argumentType.isKFunctionType(session)
         )
     }
+}
+
+private fun argumentTypeForIntToLongConversion(
+    argument: FirExpression,
+    argumentType: ConeKotlinType,
+    expectedType: ConeKotlinType
+): ConeKotlinType? {
+    if (!argument.isIntegerLiteralOrOperator()) return null
+    if (!expectedType.isLong || !argumentType.isInt) return null
+    return expectedType
 }
 
 fun Candidate.prepareCapturedType(argumentType: ConeKotlinType, context: ResolutionContext): ConeKotlinType {
@@ -441,6 +472,7 @@ internal fun Candidate.resolveArgument(
     resolveArgumentExpression(
         this.system.getBuilder(),
         argument,
+        parameter,
         expectedType,
         parameter?.returnTypeRef,
         sink,

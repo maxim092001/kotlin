@@ -65,6 +65,7 @@ class Candidate(
     var numDefaults: Int = 0
     lateinit var typeArgumentMapping: TypeArgumentMapping
     val postponedAtoms = mutableListOf<PostponedResolvedAtom>()
+    val parametersWithIntToLongConversion = mutableListOf<FirValueParameter>()
 
     var currentApplicability = CandidateApplicability.RESOLVED
         private set

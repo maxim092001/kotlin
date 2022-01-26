@@ -1,0 +1,26 @@
+FILE: intToLongConversion.fir.kt
+    public final fun takeByte(x: R|kotlin/Byte|): R|kotlin/Unit| {
+    }
+    public final fun takeShort(x: R|kotlin/Short|): R|kotlin/Unit| {
+    }
+    public final fun takeInt(x: R|kotlin/Int|): R|kotlin/Unit| {
+    }
+    public final fun takeLong(x: R|kotlin/Long|): R|kotlin/Unit| {
+    }
+    public final fun take(x: R|kotlin/Int|): R|kotlin/Int| {
+        ^take R|<local>/x|
+    }
+    public final fun take(x: R|kotlin/Long|): R|kotlin/Long| {
+        ^take R|<local>/x|
+    }
+    public final fun test_1(): R|kotlin/Unit| {
+        <Inapplicable(INAPPLICABLE): /takeByte>#(Int(1).R|kotlin/Int.plus|(Int(1)))
+        <Inapplicable(INAPPLICABLE): /takeShort>#(Int(1).R|kotlin/Int.plus|(Int(1)))
+        R|/takeInt|(Int(1).R|kotlin/Int.plus|(Int(1)))
+        R|/takeLong|(Int(1).R|kotlin/Int.plus|(Int(1)).R|kotlin/Int.toLong|())
+        R|/takeLong|(Int(1000000).R|kotlin/Int.times|(Int(1000000)).R|kotlin/Int.toLong|())
+    }
+    public final fun test_2(): R|kotlin/Unit| {
+        lval x: R|kotlin/Int| = R|/take|(Int(1).R|kotlin/Int.plus|(Int(1)))
+        lval y: R|kotlin/Int| = R|/take|(Int(1000000).R|kotlin/Int.times|(Int(1000000)))
+    }

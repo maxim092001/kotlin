@@ -1,0 +1,11 @@
+package
+
+public fun take(/*0*/ x: kotlin.Int): kotlin.Int
+public fun take(/*0*/ x: kotlin.Long): kotlin.Long
+public fun takeByte(/*0*/ x: kotlin.Byte): kotlin.Unit
+public fun takeInt(/*0*/ x: kotlin.Int): kotlin.Unit
+public fun takeLong(/*0*/ x: kotlin.Long): kotlin.Unit
+public fun takeShort(/*0*/ x: kotlin.Short): kotlin.Unit
+public fun test_1(): kotlin.Unit
+public fun test_2(): kotlin.Unit
+

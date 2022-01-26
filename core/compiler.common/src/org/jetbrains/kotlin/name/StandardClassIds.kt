@@ -196,6 +196,8 @@ object StandardClassIds {
         val clone = "clone".callableId(Cloneable)
 
         val not = "not".callableId(Boolean)
+
+        val intToLong = "toLong".callableId(Int)
     }
 }
 

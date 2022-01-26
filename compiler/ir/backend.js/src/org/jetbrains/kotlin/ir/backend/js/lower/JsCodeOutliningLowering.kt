@@ -7,7 +7,6 @@ package org.jetbrains.kotlin.ir.backend.js.lower
 
 import org.jetbrains.kotlin.backend.common.*
 import org.jetbrains.kotlin.backend.common.lower.createIrBuilder
-import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
 import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
@@ -34,7 +33,7 @@ import org.jetbrains.kotlin.js.backend.ast.*
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.utils.addIfNotNull
 
-// outlines `kotlin.js.js(code: string)` calls where js code references kotlin locals.
+// Outlines `kotlin.js.js(code: String)` calls where JS code references Kotlin locals.
 // Makes locals usages explicit.
 class JsCodeOutliningLowering(val backendContext: JsIrBackendContext) : BodyLoweringPass {
     override fun lower(irBody: IrBody, container: IrDeclaration) {
@@ -208,15 +207,15 @@ class JsScopesCollector : RecursiveJsVisitor() {
     private val functionalScopes = mutableMapOf<JsFunction?, Scope>(null to functionsStack.first())
 
     private class Scope(val parent: Scope?) {
-        val variables = hashSetOf<String>()
+        private val variables = hashSetOf<String>()
 
         fun add(variableName: String) {
             variables.add(variableName)
         }
 
-        fun isVariableWithNameExists(variableName: String): Boolean {
+        fun variableWithNameExists(variableName: String): Boolean {
             return variables.contains(variableName) ||
-                    parent?.isVariableWithNameExists(variableName) == true
+                    parent?.variableWithNameExists(variableName) == true
         }
     }
 
@@ -239,8 +238,8 @@ class JsScopesCollector : RecursiveJsVisitor() {
         functionsStack.pop()
     }
 
-    fun isTheVarWithNameExistsInScopeOf(function: JsFunction?, variableName: String): Boolean {
-        return functionalScopes[function]!!.isVariableWithNameExists(variableName)
+    fun varWithNameExistsInScopeOf(function: JsFunction?, variableName: String): Boolean {
+        return functionalScopes[function]!!.variableWithNameExists(variableName)
     }
 }
 
@@ -273,6 +272,6 @@ private class KotlinLocalsUsageCollector(
     }
 
     private fun JsName.isDeclaredInsideJsCode(): Boolean {
-        return scopeInfo.isTheVarWithNameExistsInScopeOf(functionStack.peek(), ident)
+        return scopeInfo.varWithNameExistsInScopeOf(functionStack.peek(), ident)
     }
 }

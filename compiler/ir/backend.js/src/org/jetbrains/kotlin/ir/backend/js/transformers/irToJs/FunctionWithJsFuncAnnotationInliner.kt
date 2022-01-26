@@ -17,7 +17,11 @@ class FunctionWithJsFuncAnnotationInliner(private val jsFuncCall: IrCall, privat
 
     fun generateResultStatement(): List<JsStatement> {
         return function.body.statements
-            .apply { SimpleJsCodeInliner(replacements).acceptList(this) }
+            .run {
+                SimpleJsCodeInliner(replacements)
+                    .apply { acceptList(this@run) }
+                    .withTemporaryVariablesForExpressions(this)
+            }
     }
 
     private fun getJsFunctionImplementation(): JsFunction {
@@ -40,7 +44,15 @@ class FunctionWithJsFuncAnnotationInliner(private val jsFuncCall: IrCall, privat
 
 private class SimpleJsCodeInliner(private val replacements: Map<JsName, JsExpression>): RecursiveJsVisitor() {
     private val temporaryNamesForExpressions = mutableMapOf<JsName, JsExpression>()
-    val neededToDeclareVariables: Map<JsName, JsExpression> get() = temporaryNamesForExpressions
+
+    fun withTemporaryVariablesForExpressions(statements: List<JsStatement>): List<JsStatement> {
+        if (temporaryNamesForExpressions.isEmpty()) {
+            return statements
+        }
+
+        val variableDeclarations = temporaryNamesForExpressions.map { JsVars(JsVars.JsVar(it.key, it.value)) }
+        return variableDeclarations + statements
+    }
 
     override fun visitNameRef(nameRef: JsNameRef) {
         super.visitNameRef(nameRef)
@@ -48,8 +60,8 @@ private class SimpleJsCodeInliner(private val replacements: Map<JsName, JsExpres
         nameRef.name = nameRef.name?.getReplacement() ?: return
     }
 
-    private fun declareNewTemporaryFor(expression: JsExpression): JsName {
-        return JsName("tmp", true)
+    private fun JsName.declareNewTemporaryFor(expression: JsExpression): JsName {
+        return JsName(ident, true)
             .also { temporaryNamesForExpressions[it] = expression }
     }
 

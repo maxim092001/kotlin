@@ -103,13 +103,13 @@ internal class BaseDirs(val testBuildDir: File)
 internal class Timeouts(val executionTimeout: Duration)
 
 /**
- * Used cache kind.
+ * Used cache mode.
  */
-internal sealed interface CacheKind {
+internal sealed interface CacheMode {
     val staticCacheRootDir: File?
     val staticCacheRequiredForEveryLibrary: Boolean
 
-    object WithoutCache : CacheKind {
+    object WithoutCache : CacheMode {
         override val staticCacheRootDir: File? get() = null
         override val staticCacheRequiredForEveryLibrary get() = false
     }
@@ -119,7 +119,7 @@ internal sealed interface CacheKind {
         kotlinNativeTargets: KotlinNativeTargets,
         optimizationMode: OptimizationMode,
         override val staticCacheRequiredForEveryLibrary: Boolean
-    ) : CacheKind {
+    ) : CacheMode {
         override val staticCacheRootDir: File? = kotlinNativeHome.dir
             .resolve("klib/cache")
             .resolve(
@@ -135,7 +135,7 @@ internal sealed interface CacheKind {
         }
     }
 
-    enum class Alias { NO, ONLY_DIST, EVERYWHERE }
+    enum class Alias { NO, STATIC_ONLY_DIST, STATIC_EVERYWHERE }
 
     companion object {
         private fun computeCacheDirName(testTarget: KonanTarget, cacheKind: String, debuggable: Boolean) =

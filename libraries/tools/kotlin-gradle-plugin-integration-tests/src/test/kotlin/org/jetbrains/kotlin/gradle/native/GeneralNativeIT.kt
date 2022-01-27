@@ -479,7 +479,16 @@ class GeneralNativeIT : BaseGradleIT() {
         build("tasks") {
             assertSuccessful()
             runTasks.forEach {
-                assertTrue(output.contains(it), "The 'tasks' output doesn't contain a task ${it}")
+                assertTrue(
+                    output.contains(it), """
+                    The 'tasks' output doesn't contain a task ${it}
+                    
+                    ------------------------
+                    The output got:
+                    $output
+                    ------------------------
+                    """.trimIndent()
+                )
             }
         }
 
@@ -658,6 +667,13 @@ class GeneralNativeIT : BaseGradleIT() {
     private fun Project.checkTestsUpToDate(testsToExecute: List<String>, testsToSkip: List<String>) {
         // Check that test tasks are up-to-date on second run
         build("check") {
+            println("""
+                ----------------------
+                Output of 'check' 
+                ----------------------
+                $output
+                ----------------------
+            """.trimIndent())
             assertSuccessful()
 
             assertTasksUpToDate(*testsToExecute.toTypedArray())
@@ -666,6 +682,13 @@ class GeneralNativeIT : BaseGradleIT() {
 
         // Check that setting new value to tracked environment variable triggers tests rerun
         build("check", options = defaultBuildOptions().copy(androidHome = projectDir)) {
+            println("""
+                ----------------------
+                Output of 'check' with option set 
+                ----------------------
+                $output
+                ----------------------
+            """.trimIndent())
             assertSuccessful()
 
             assertTasksExecuted(*testsToExecute.toTypedArray())
@@ -673,6 +696,13 @@ class GeneralNativeIT : BaseGradleIT() {
         }
 
         build("check", options = defaultBuildOptions().copy(androidHome = projectDir)) {
+            println("""
+                ----------------------
+                Output of 'check' with option set the second time 
+                ----------------------
+                $output
+                ----------------------
+            """.trimIndent())
             assertSuccessful()
 
             assertTasksUpToDate(*testsToExecute.toTypedArray())

@@ -11,7 +11,7 @@ import org.jetbrains.kotlin.fir.builder.FirAnnotationContainerBuilder
 import org.jetbrains.kotlin.fir.builder.FirBuilderDsl
 import org.jetbrains.kotlin.fir.expressions.FirAnnotation
 import org.jetbrains.kotlin.fir.expressions.FirAugmentedArraySetCall
-import org.jetbrains.kotlin.fir.expressions.FirBlock
+import org.jetbrains.kotlin.fir.expressions.FirExpression
 import org.jetbrains.kotlin.fir.expressions.FirFunctionCall
 import org.jetbrains.kotlin.fir.expressions.FirOperation
 import org.jetbrains.kotlin.fir.expressions.impl.FirAugmentedArraySetCallImpl
@@ -28,8 +28,9 @@ import org.jetbrains.kotlin.fir.visitors.*
 class FirAugmentedArraySetCallBuilder : FirAnnotationContainerBuilder {
     override var source: KtSourceElement? = null
     override val annotations: MutableList<FirAnnotation> = mutableListOf()
-    lateinit var assignCall: FirFunctionCall
-    lateinit var setGetBlock: FirBlock
+    lateinit var lhsGetCall: FirFunctionCall
+    lateinit var rhs: FirExpression
+    lateinit var rhs2: FirExpression
     lateinit var operation: FirOperation
     var calleeReference: FirReference = FirStubReference
 
@@ -37,8 +38,9 @@ class FirAugmentedArraySetCallBuilder : FirAnnotationContainerBuilder {
         return FirAugmentedArraySetCallImpl(
             source,
             annotations,
-            assignCall,
-            setGetBlock,
+            lhsGetCall,
+            rhs,
+            rhs2,
             operation,
             calleeReference,
         )

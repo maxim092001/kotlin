@@ -19,8 +19,9 @@ import org.jetbrains.kotlin.fir.visitors.*
 abstract class FirAugmentedArraySetCall : FirPureAbstractElement(), FirStatement {
     abstract override val source: KtSourceElement?
     abstract override val annotations: List<FirAnnotation>
-    abstract val assignCall: FirFunctionCall
-    abstract val setGetBlock: FirBlock
+    abstract val lhsGetCall: FirFunctionCall
+    abstract val rhs: FirExpression
+    abstract val rhs2: FirExpression
     abstract val operation: FirOperation
     abstract val calleeReference: FirReference
 

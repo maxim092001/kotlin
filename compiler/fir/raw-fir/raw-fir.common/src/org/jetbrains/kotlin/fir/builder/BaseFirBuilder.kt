@@ -1024,43 +1024,25 @@ abstract class BaseFirBuilder<T>(val baseSession: FirSession, val context: Conte
         rhs: T?,
         convert: T.() -> FirExpression
     ): FirStatement {
+        require(receiver is FirFunctionCall) {
+            "Array access should be desugared to a function call, but $receiver is found"
+        }
+
         return buildAugmentedArraySetCall {
             source = baseSource
             this.operation = operation
-            assignCall = generateAugmentedCallForAugmentedArraySetCall(receiver, baseSource, operation, rhs, convert)
-            setGetBlock =
-                generateSetGetBlockForAugmentedArraySetCall(receiver, baseSource, arrayAccessSource, operation, rhs, convert)
+            this.lhsGetCall = receiver
+            this.rhs = rhs?.convert() ?: buildErrorExpression(
+                null,
+                ConeSimpleDiagnostic("No value for array set", DiagnosticKind.Syntax)
+            )
+            this.rhs2 = rhs?.convert() ?: buildErrorExpression(
+                null,
+                ConeSimpleDiagnostic("No value for array set", DiagnosticKind.Syntax)
+            )
             this.annotations += annotations
         }
     }
-
-    private fun generateAugmentedCallForAugmentedArraySetCall(
-        receiver: FirExpression, // a.get(x,y)
-        baseSource: KtSourceElement?,
-        operation: FirOperation,
-        rhs: T?,
-        convert: T.() -> FirExpression
-    ): FirFunctionCall {
-        /*
-         * Desugarings of a[x, y] += z to
-         * a.get(x, y).plusAssign(z)
-         */
-        return buildFunctionCall {
-            source = baseSource?.fakeElement(KtFakeSourceElementKind.DesugaredCompoundAssignment)
-            calleeReference = buildSimpleNamedReference {
-                name = FirOperationNameConventions.ASSIGNMENTS.getValue(operation)
-            }
-            explicitReceiver = receiver
-            argumentList = buildArgumentList {
-                arguments += rhs?.convert() ?: buildErrorExpression(
-                    null,
-                    ConeSimpleDiagnostic("No value for array set", DiagnosticKind.Syntax)
-                )
-            }
-            origin = FirFunctionCallOrigin.Operator
-        }
-    }
-
 
     private fun generateSetGetBlockForAugmentedArraySetCall(
         receiver: FirExpression,
@@ -1260,14 +1242,6 @@ abstract class BaseFirBuilder<T>(val baseSession: FirSession, val context: Conte
 
     protected fun FirCallableDeclaration.initContainingClassAttr() {
         initContainingClassAttr(context)
-    }
-
-    private fun FirVariable.toQualifiedAccess(): FirQualifiedAccessExpression = buildPropertyAccessExpression {
-        calleeReference = buildResolvedNamedReference {
-            source = this@toQualifiedAccess.source?.fakeElement(KtFakeSourceElementKind.ReferenceInAtomicQualifiedAccess)
-            name = this@toQualifiedAccess.name
-            resolvedSymbol = this@toQualifiedAccess.symbol
-        }
     }
 
     protected inline fun <R> withDefaultSourceElementKind(newDefault: KtSourceElementKind, action: () -> R): R {

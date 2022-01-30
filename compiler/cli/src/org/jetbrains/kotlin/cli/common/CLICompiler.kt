@@ -25,7 +25,7 @@ import org.jetbrains.kotlin.cli.common.ExitCode.INTERNAL_ERROR
 import org.jetbrains.kotlin.cli.common.arguments.CommonCompilerArguments
 import org.jetbrains.kotlin.cli.common.environment.setIdeaIoUseFallback
 import org.jetbrains.kotlin.cli.common.messages.*
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.INFO
+import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.*
 import org.jetbrains.kotlin.cli.jvm.plugins.PluginCliParser
 import org.jetbrains.kotlin.compiler.plugin.ComponentRegistrar
 import org.jetbrains.kotlin.config.CompilerConfiguration
@@ -153,7 +153,7 @@ abstract class CLICompiler<A : CommonCompilerArguments> : CLITool<A>() {
 
     protected abstract fun MutableList<String>.addPlatformOptions(arguments: A)
 
-    protected fun loadPlugins(paths: KotlinPaths?, arguments: A, configuration: CompilerConfiguration): ExitCode {
+    protected fun loadPlugins(paths: KotlinPaths?, arguments: A, configuration: CompilerConfiguration, messageCollector: MessageCollector): ExitCode {
         var pluginClasspaths: Iterable<String> = arguments.pluginClasspaths?.asIterable() ?: emptyList()
         val pluginOptions = arguments.pluginOptions?.toMutableList() ?: ArrayList()
 
@@ -180,8 +180,8 @@ abstract class CLICompiler<A : CommonCompilerArguments> : CLITool<A>() {
         } else {
             pluginOptions.add("plugin:kotlin.scripting:disable=true")
         }
-        pluginClasspaths.forEach { System.err.println("Plugin classpath: $it") }
-        pluginOptions.forEach { System.err.println("Plugin option: $it") }
+        messageCollector.report(INFO, "Plugin classpath: " +  pluginClasspaths.joinToString(":"))
+        messageCollector.report(INFO, "Plugin options: " +  pluginOptions.joinToString(":"))
         return PluginCliParser.loadPluginsSafe(pluginClasspaths, pluginOptions, configuration)
     }
 

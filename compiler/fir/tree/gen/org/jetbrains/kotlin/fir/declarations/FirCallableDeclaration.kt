@@ -45,6 +45,8 @@ sealed class FirCallableDeclaration : FirMemberDeclaration() {
 
     abstract override fun replaceResolvePhase(newResolvePhase: FirResolvePhase)
 
+    abstract override fun replaceTypeParameters(newTypeParameters: List<FirTypeParameterRef>)
+
     abstract fun replaceReturnTypeRef(newReturnTypeRef: FirTypeRef)
 
     abstract fun replaceReceiverTypeRef(newReceiverTypeRef: FirTypeRef?)

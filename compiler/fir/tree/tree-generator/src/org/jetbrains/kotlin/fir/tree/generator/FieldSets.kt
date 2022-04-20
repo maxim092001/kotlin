@@ -58,6 +58,7 @@ object FieldSets {
     val valueParameters by lazy { fieldList(valueParameter) }
 
     val typeParameters by lazy { fieldList("typeParameters", typeParameter) }
+//    val typeParameters by lazy { fieldList("typeParameters", typeParameter, nonReplaceableField = typeParameterRefs) }
 
     val typeParameterRefs by lazy { fieldList("typeParameters", typeParameterRef, withReplace = true, overrideTypeRequire = false) }
 

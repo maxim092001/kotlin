@@ -12,9 +12,9 @@ class ReturnType {
 
 }
 
-@Self
-class WithTypeParameter<T : WithTypeParameter<T>> {
-
-    fun withTypeParameter(): Self = this
-
-}
+//@Self
+//class WithTypeParameter<T : WithTypeParameter<T>> {
+//
+//    fun withTypeParameter(): Self = this
+//
+//}

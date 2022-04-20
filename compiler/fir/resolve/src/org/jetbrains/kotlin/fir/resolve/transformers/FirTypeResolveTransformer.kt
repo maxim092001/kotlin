@@ -273,6 +273,7 @@ open class FirTypeResolveTransformer(
                     origin = FirDeclarationOrigin.Source
                     name = Name.special("<Self>")
                     symbol = selfSymbol
+                    containingDeclarationSymbol = firClass.symbol
                     variance = Variance.OUT_VARIANCE
                     isReified = false
                 }.build())

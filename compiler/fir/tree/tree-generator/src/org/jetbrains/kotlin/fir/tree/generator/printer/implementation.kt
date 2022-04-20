@@ -339,10 +339,10 @@ fun SmartPrinter.printImplementation(implementation: Implementation) {
                 val capitalizedFieldName = field.name.replaceFirstChar(Char::uppercaseChar)
                 val newValue = "new$capitalizedFieldName"
 
-                val isInOverridenTypes = (field.overridenTypes.filterIsInstance<Field>()
-                    .any { it.name == "typeParameters" })
+                val overridenTypeRequire = (field.overridenTypes.filterIsInstance<Field>()
+                    .any { !it.overrideTypeRequire })
 
-                if (!(field.name == "typeParameters" && isInOverridenTypes)) {
+                if (!overridenTypeRequire) {
                     generateReplace(field, forceNullable = field.useNullableForReplace) {
                         when {
                             field.withGetter -> {}

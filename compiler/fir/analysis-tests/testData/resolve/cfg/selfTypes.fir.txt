@@ -14,18 +14,8 @@ FILE: selfTypes.kt
             super<R|kotlin/Any|>()
         }
 
-        public final fun returnType(): R|kotlin/Self| {
-            ^returnType this@R|/ReturnType|
-        }
-
-    }
-    @R|kotlin/Self|() public final class WithTypeParameter<T : R|WithTypeParameter<T>|, out <Self> : R|WithTypeParameter<T, <Self>>|> : R|kotlin/Any| {
-        public constructor<T : R|WithTypeParameter<T>|>(): R|WithTypeParameter<T>| {
-            super<R|kotlin/Any|>()
-        }
-
-        public final fun withTypeParameter(): R|kotlin/Self| {
-            ^withTypeParameter this@R|/WithTypeParameter|
+        public final fun returnType(): R|<Self>| {
+            ^returnType (this@R|/ReturnType| as R|kotlin/Self|)
         }
 
     }

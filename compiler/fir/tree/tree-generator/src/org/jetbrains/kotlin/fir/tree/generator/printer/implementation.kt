@@ -363,9 +363,16 @@ fun SmartPrinter.printImplementation(implementation: Implementation) {
                 }
                 for (overridenType in field.overridenTypes) {
                     generateReplace(field, overridenType) {
-                        if (overridenType is Field && overridenType.overrideTypeRequire)
+                        if (overridenType is Field && overridenType.overrideTypeRequire) {
                             println("require($newValue is ${field.typeWithArguments})")
-                        println("replace$capitalizedFieldName($newValue)")
+                            println("replace$capitalizedFieldName($newValue)")
+                        } else if (overridenType is Field && field.origin is FieldList) {
+                            val genericType =
+                                field.type.substring(field.type.indexOfFirst { it == '<' } + 1, field.type.indexOfLast { it == '>' })
+                            println("require($newValue.all { it is $genericType })")
+                            println("${field.name}.clear()")
+                            println("${field.name}.addAll($newValue.map { it as $genericType })")
+                        }
                     }
                 }
             }

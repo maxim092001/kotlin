@@ -176,7 +176,9 @@ internal class FirAnonymousFunctionImpl(
     }
 
     override fun replaceTypeParameters(newTypeParameters: List<FirTypeParameterRef>) {
-        replaceTypeParameters(newTypeParameters)
+        require(newTypeParameters.all { it is FirTypeParameter })
+        typeParameters.clear()
+        typeParameters.addAll(newTypeParameters.map { it as FirTypeParameter })
     }
 
     override fun replaceTypeRef(newTypeRef: FirTypeRef) {

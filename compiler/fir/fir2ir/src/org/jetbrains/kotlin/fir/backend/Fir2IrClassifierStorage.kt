@@ -376,6 +376,7 @@ class Fir2IrClassifierStorage(
     ): IrTypeParameter {
         require(index >= 0)
         val origin = typeParameter.computeIrOrigin()
+        val replacedSelfName = if (typeParameter.name.asString() == "<Self>") Name.identifier("\$Self") else typeParameter.name
         val irTypeParameter = with(typeParameter) {
             convertWithOffsets { startOffset, endOffset ->
                 signatureComposer.composeTypeParameterSignature(
@@ -409,7 +410,7 @@ class Fir2IrClassifierStorage(
                     }
                 } ?: irFactory.createTypeParameter(
                     startOffset, endOffset, origin, IrTypeParameterSymbolImpl(),
-                    name, if (index < 0) 0 else index,
+                    replacedSelfName, if (index < 0) 0 else index,
                     isReified,
                     variance
                 )

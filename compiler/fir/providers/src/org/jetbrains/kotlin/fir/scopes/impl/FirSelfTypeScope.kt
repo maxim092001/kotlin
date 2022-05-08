@@ -17,7 +17,7 @@ class FirSelfTypeScope(val memberDeclaration: FirMemberDeclaration) : FirScope()
         name: Name,
         processor: (FirClassifierSymbol<*>, ConeSubstitutor) -> Unit
     ) {
-        if (name == Name.special("<Self>")) {
+        if (name.asString() == "Self") {
             val selfSymbol = memberDeclaration.typeParameters.find { it.symbol.name == Name.special("<Self>") }?.symbol
             if (selfSymbol != null) {
                 return processor(selfSymbol, ConeSubstitutor.Empty)

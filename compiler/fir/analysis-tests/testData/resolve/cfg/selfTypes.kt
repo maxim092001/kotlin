@@ -8,13 +8,6 @@ class JustSelfAnnotation {
 @Self
 class ReturnType {
 
-    fun returnType(): Self = this
+    fun returnType(): Self = this as Self
 
 }
-
-//@Self
-//class WithTypeParameter<T : WithTypeParameter<T>> {
-//
-//    fun withTypeParameter(): Self = this
-//
-//}

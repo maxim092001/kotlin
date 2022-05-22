@@ -9,6 +9,7 @@ import org.jetbrains.kotlin.fir.FirSession
 import org.jetbrains.kotlin.fir.declarations.*
 import org.jetbrains.kotlin.fir.expressions.*
 import org.jetbrains.kotlin.fir.references.FirErrorNamedReference
+import org.jetbrains.kotlin.fir.render
 import org.jetbrains.kotlin.fir.resolve.ResolutionMode
 import org.jetbrains.kotlin.fir.resolve.ScopeSession
 import org.jetbrains.kotlin.fir.resolve.transformers.body.resolve.BodyResolveContext
@@ -138,6 +139,7 @@ private class FirExpressionsResolveTransformerForSpecificAnnotations(
 ) : FirExpressionsResolveTransformer(transformer) {
 
     override fun transformAnnotation(annotation: FirAnnotation, data: ResolutionMode): FirStatement {
+        if (annotation.typeRef.render() == "R|kotlin/Self|") return annotation
         dataFlowAnalyzer.enterAnnotation(annotation)
         annotation.transformChildren(transformer, ResolutionMode.ContextDependent)
         dataFlowAnalyzer.exitAnnotation(annotation)

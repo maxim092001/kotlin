@@ -26,6 +26,8 @@ import org.jetbrains.kotlin.fir.resolve.diagnostics.*
 import org.jetbrains.kotlin.fir.resolve.providers.symbolProvider
 import org.jetbrains.kotlin.fir.resolve.substitution.ConeSubstitutor
 import org.jetbrains.kotlin.fir.resolve.transformers.ScopeClassDeclaration
+import org.jetbrains.kotlin.fir.scopes.FirScope
+import org.jetbrains.kotlin.fir.scopes.impl.FirSelfTypeScope
 import org.jetbrains.kotlin.fir.symbols.ConeTypeParameterLookupTag
 import org.jetbrains.kotlin.fir.symbols.FirBasedSymbol
 import org.jetbrains.kotlin.fir.symbols.SymbolInternals
@@ -142,15 +144,22 @@ class FirTypeResolverImpl(private val session: FirSession) : FirTypeResolver() {
             }
         }
 
-        for (scope in scopes) {
-            if (applicability == CandidateApplicability.RESOLVED) break
+        fun processClassifiers(scope: FirScope): Unit =
             scope.processClassifiersByNameWithSubstitution(qualifier.first().name) { symbol, substitutorFromScope ->
                 val resolvedSymbol = resolveSymbol(symbol, qualifier, qualifierResolver)
                     ?: return@processClassifiersByNameWithSubstitution
 
                 processCandidate(resolvedSymbol, substitutorFromScope)
             }
-        }
+
+        val selfTypeScope: FirScope? = scopes.find { scope -> scope is FirSelfTypeScope }
+        if (selfTypeScope != null && typeRef.render() == "Self")
+            processClassifiers(selfTypeScope)
+        else
+            for (scope in scopes) {
+                if (applicability == CandidateApplicability.RESOLVED) break
+                processClassifiers(scope)
+            }
 
         if (applicability != CandidateApplicability.RESOLVED) {
             val symbol = qualifierResolver.resolveSymbol(qualifier)

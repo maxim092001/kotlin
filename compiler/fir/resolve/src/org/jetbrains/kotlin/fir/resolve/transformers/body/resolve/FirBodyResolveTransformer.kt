@@ -20,6 +20,7 @@ import org.jetbrains.kotlin.fir.resolve.transformers.FirProviderInterceptor
 import org.jetbrains.kotlin.fir.resolve.transformers.ReturnTypeCalculator
 import org.jetbrains.kotlin.fir.resolve.transformers.ReturnTypeCalculatorForFullBodyResolve
 import org.jetbrains.kotlin.fir.resolve.transformers.ScopeClassDeclaration
+import org.jetbrains.kotlin.fir.scopes.impl.FirSelfTypeScope
 import org.jetbrains.kotlin.fir.types.*
 import org.jetbrains.kotlin.fir.visitors.FirTransformer
 
@@ -64,11 +65,21 @@ open class FirBodyResolveTransformer(
         val resolvedTypeRef = if (typeRef is FirResolvedTypeRef) {
             typeRef
         } else {
+
             typeResolverTransformer.withFile(context.file) {
+
+                val selfAnnotation =
+                    context.topClassDeclaration?.annotations?.find { it.typeRef.render() == "R|kotlin/Self|" }
+                val scopes =
+                    components.createCurrentScopeList() + if (context.topClassDeclaration != null && selfAnnotation != null)
+                        listOf(FirSelfTypeScope(context.topClassDeclaration!!))
+                    else
+                        emptyList()
+
                 transformTypeRef(
                     typeRef,
                     ScopeClassDeclaration(
-                        components.createCurrentScopeList(),
+                        scopes,
                         context.containingClassDeclarations,
                         context.containers.lastOrNull { it is FirTypeParameterRefsOwner && it !is FirAnonymousFunction }
                     )

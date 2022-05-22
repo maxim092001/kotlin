@@ -8,6 +8,9 @@ class JustSelfAnnotation {
 @Self
 class ReturnType {
 
-    fun returnType(): Self = this as Self
+    fun returnType(): Self {
+        val res: Self  = this <!UNCHECKED_CAST!>as Self<!>
+        return res
+    }
 
 }

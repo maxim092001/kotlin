@@ -15,7 +15,8 @@ FILE: selfTypes.kt
         }
 
         public final fun returnType(): R|<Self>| {
-            ^returnType (this@R|/ReturnType| as R|kotlin/Self|)
+            lval res: R|<Self>| = (this@R|/ReturnType| as R|<Self>|)
+            ^returnType R|<local>/res|
         }
 
     }

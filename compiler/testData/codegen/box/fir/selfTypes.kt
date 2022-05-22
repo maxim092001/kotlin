@@ -3,18 +3,20 @@
 
 // WITH_STDLIB
 
-//import kotlin.Self
+import kotlin.Self
 
-//@Self
+@Self
 class Foo {
     public val bar = 1
 
-//    fun test(): Self = (this as Self)
+    fun test(): Self = this as Self
 
     fun box(): String {
-//        val isSelf = test().bar
-//        println(isSelf)
-        return "OK"
+        val testSelf = test()
+        if (testSelf.bar == this.bar)
+            return "OK"
+        else
+            return "ERROR"
     }
 }
 

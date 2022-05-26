@@ -16,6 +16,7 @@ import org.jetbrains.kotlin.fir.resolve.ScopeSession
 import org.jetbrains.kotlin.fir.resolve.calls.ResolutionContext
 import org.jetbrains.kotlin.fir.resolve.createCurrentScopeList
 import org.jetbrains.kotlin.fir.resolve.dfa.DataFlowAnalyzerContext
+import org.jetbrains.kotlin.fir.resolve.fqName
 import org.jetbrains.kotlin.fir.resolve.transformers.FirProviderInterceptor
 import org.jetbrains.kotlin.fir.resolve.transformers.ReturnTypeCalculator
 import org.jetbrains.kotlin.fir.resolve.transformers.ReturnTypeCalculatorForFullBodyResolve
@@ -69,10 +70,10 @@ open class FirBodyResolveTransformer(
             typeResolverTransformer.withFile(context.file) {
 
                 val selfAnnotation =
-                    context.topClassDeclaration?.annotations?.find { it.typeRef.render() == "R|kotlin/Self|" }
+                    context.topClassDeclaration?.annotations?.find { it.fqName(session)?.asString() == "kotlin.Self" }
                 val scopes =
-                    components.createCurrentScopeList() + if (context.topClassDeclaration != null && selfAnnotation != null)
-                        listOf(FirSelfTypeScope(context.topClassDeclaration!!))
+                    if (context.topClassDeclaration != null && selfAnnotation != null)
+                        listOf(FirSelfTypeScope(context.topClassDeclaration!!)) + components.createCurrentScopeList()
                     else
                         emptyList()
 

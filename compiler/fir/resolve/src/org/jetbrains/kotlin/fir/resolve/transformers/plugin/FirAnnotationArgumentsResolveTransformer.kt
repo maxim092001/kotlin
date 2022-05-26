@@ -139,7 +139,6 @@ private class FirExpressionsResolveTransformerForSpecificAnnotations(
 ) : FirExpressionsResolveTransformer(transformer) {
 
     override fun transformAnnotation(annotation: FirAnnotation, data: ResolutionMode): FirStatement {
-        if (annotation.typeRef.render() == "R|kotlin/Self|") return annotation
         dataFlowAnalyzer.enterAnnotation(annotation)
         annotation.transformChildren(transformer, ResolutionMode.ContextDependent)
         dataFlowAnalyzer.exitAnnotation(annotation)

@@ -152,14 +152,10 @@ class FirTypeResolverImpl(private val session: FirSession) : FirTypeResolver() {
                 processCandidate(resolvedSymbol, substitutorFromScope)
             }
 
-        val selfTypeScope: FirScope? = scopes.find { scope -> scope is FirSelfTypeScope }
-        if (selfTypeScope != null && typeRef.render() == "Self")
-            processClassifiers(selfTypeScope)
-        else
-            for (scope in scopes) {
-                if (applicability == CandidateApplicability.RESOLVED) break
-                processClassifiers(scope)
-            }
+        for (scope in scopes) {
+            if (applicability == CandidateApplicability.RESOLVED) break
+            processClassifiers(scope)
+        }
 
         if (applicability != CandidateApplicability.RESOLVED) {
             val symbol = qualifierResolver.resolveSymbol(qualifier)

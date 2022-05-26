@@ -94,4 +94,24 @@ FILE: selfTypes.kt
             ^returnType (this@R|/InnerSelfClass| as R|<Self>|)
         }
 
+        public final fun returnSelfClassType(): R|InnerSelfClass.Self| {
+            ^returnSelfClassType R|/InnerSelfClass.InnerSelfClass|().R|/InnerSelfClass.Self.Self|()
+        }
+
+    }
+    @R|kotlin/Self|() public final class TypeAliasSelf<out <Self> : R|TypeAliasSelf<<Self>>|> : R|kotlin/Any| {
+        public constructor(): R|TypeAliasSelf| {
+            super<R|kotlin/Any|>()
+        }
+
+        @R|kotlin/Suppress|(names = vararg(String(TOPLEVEL_TYPEALIASES_ONLY))) public final typealias Self = R|kotlin/String|
+
+        public final fun returnType(): R|<Self>| {
+            ^returnType (this@R|/TypeAliasSelf| as R|<Self>|)
+        }
+
+        public final fun returnTypealias(): R|TypeAliasSelf.Self| {
+            ^returnTypealias String(typealias)
+        }
+
     }

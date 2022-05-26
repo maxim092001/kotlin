@@ -47,7 +47,6 @@ class StaticClass {
 
 @Self
 class InnerSelfClass {
-
     inner class Self {
         fun returnSelf(): InnerSelfClass.Self {
             return this
@@ -58,4 +57,21 @@ class InnerSelfClass {
         return this <!UNCHECKED_CAST!>as Self<!>
     }
 
+    fun returnSelfClassType(): InnerSelfClass.Self {
+        return InnerSelfClass().Self()
+    }
+}
+
+@Self
+class TypeAliasSelf {
+    @Suppress("TOPLEVEL_TYPEALIASES_ONLY")
+    typealias Self = String
+
+    fun returnType(): Self {
+        return this <!UNCHECKED_CAST!>as Self<!>
+    }
+
+    fun returnTypealias(): TypeAliasSelf.Self {
+        return "typealias"
+    }
 }

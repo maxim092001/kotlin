@@ -60,8 +60,6 @@ class Fir2IrClassifierStorage(
 
     private val localStorage = Fir2IrLocalStorage()
 
-    private val SELF_TYPE_IDENTIFIER = Name.identifier("\$Self")
-
     private fun FirTypeRef.toIrType(typeContext: ConversionTypeContext = ConversionTypeContext.DEFAULT): IrType =
         with(typeConverter) { toIrType(typeContext) }
 
@@ -596,5 +594,9 @@ class Fir2IrClassifierStorage(
         ).apply {
             parent = IrExternalPackageFragmentImpl(IrExternalPackageFragmentSymbolImpl(), FqName.ROOT)
         }
+    }
+
+    companion object Fir2IrClassifierStorage {
+        private val SELF_TYPE_IDENTIFIER = Name.identifier("\$Self")
     }
 }

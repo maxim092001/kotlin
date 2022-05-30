@@ -60,6 +60,8 @@ class Fir2IrClassifierStorage(
 
     private val localStorage = Fir2IrLocalStorage()
 
+    private val SELF_TYPE_IDENTIFIER = Name.identifier("\$Self")
+
     private fun FirTypeRef.toIrType(typeContext: ConversionTypeContext = ConversionTypeContext.DEFAULT): IrType =
         with(typeConverter) { toIrType(typeContext) }
 
@@ -378,7 +380,7 @@ class Fir2IrClassifierStorage(
         require(index >= 0)
         val origin = typeParameter.computeIrOrigin()
         val irTypeParameter = with(typeParameter) {
-            val replacedSelfName = if (name == SELF_TYPE) Name.identifier("\$Self") else name
+            val replacedSelfName = if (name == SELF_TYPE) SELF_TYPE_IDENTIFIER else name
             convertWithOffsets { startOffset, endOffset ->
                 signatureComposer.composeTypeParameterSignature(
                     typeParameter, index, ownerSymbol.signature

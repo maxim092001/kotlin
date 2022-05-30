@@ -10,6 +10,7 @@ import org.jetbrains.kotlin.fir.resolve.substitution.ConeSubstitutor
 import org.jetbrains.kotlin.fir.scopes.FirScope
 import org.jetbrains.kotlin.fir.symbols.impl.FirClassifierSymbol
 import org.jetbrains.kotlin.name.Name
+import org.jetbrains.kotlin.name.SpecialNames.SELF_TYPE
 
 class FirSelfTypeScope(val memberDeclaration: FirMemberDeclaration) : FirScope() {
 
@@ -18,7 +19,7 @@ class FirSelfTypeScope(val memberDeclaration: FirMemberDeclaration) : FirScope()
         processor: (FirClassifierSymbol<*>, ConeSubstitutor) -> Unit
     ) {
         if (name.asString() == "Self") {
-            val selfSymbol = memberDeclaration.typeParameters.find { it.symbol.name == Name.special("<Self>") }?.symbol
+            val selfSymbol = memberDeclaration.typeParameters.find { it.symbol.name == SELF_TYPE }?.symbol
             if (selfSymbol != null) {
                 return processor(selfSymbol, ConeSubstitutor.Empty)
             }

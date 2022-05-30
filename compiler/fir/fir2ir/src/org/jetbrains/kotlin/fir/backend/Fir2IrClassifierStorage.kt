@@ -33,6 +33,7 @@ import org.jetbrains.kotlin.ir.util.IdSignature
 import org.jetbrains.kotlin.ir.util.constructors
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
+import org.jetbrains.kotlin.name.SpecialNames.SELF_TYPE
 import org.jetbrains.kotlin.name.StandardClassIds
 import org.jetbrains.kotlin.utils.addToStdlib.runUnless
 
@@ -377,7 +378,7 @@ class Fir2IrClassifierStorage(
         require(index >= 0)
         val origin = typeParameter.computeIrOrigin()
         val irTypeParameter = with(typeParameter) {
-            val replacedSelfName = if (name.asString() == "<Self>") Name.identifier("\$Self") else name
+            val replacedSelfName = if (name == SELF_TYPE) Name.identifier("\$Self") else name
             convertWithOffsets { startOffset, endOffset ->
                 signatureComposer.composeTypeParameterSignature(
                     typeParameter, index, ownerSymbol.signature

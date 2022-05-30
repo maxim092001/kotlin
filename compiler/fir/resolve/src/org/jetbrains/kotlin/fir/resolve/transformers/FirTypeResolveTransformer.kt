@@ -33,7 +33,7 @@ import org.jetbrains.kotlin.fir.types.*
 import org.jetbrains.kotlin.fir.types.builder.buildErrorTypeRef
 import org.jetbrains.kotlin.fir.types.builder.buildResolvedTypeRef
 import org.jetbrains.kotlin.fir.types.impl.ConeTypeParameterTypeImpl
-import org.jetbrains.kotlin.name.Name
+import org.jetbrains.kotlin.name.SpecialNames.SELF_TYPE
 import org.jetbrains.kotlin.types.Variance
 
 class FirTypeResolveProcessor(
@@ -272,7 +272,7 @@ open class FirTypeResolveTransformer(
                     moduleData = session.moduleData
                     resolvePhase = FirResolvePhase.TYPES
                     origin = FirDeclarationOrigin.Source
-                    name = Name.special("<Self>")
+                    name = SELF_TYPE
                     symbol = selfSymbol
                     containingDeclarationSymbol = firClass.symbol
                     variance = Variance.OUT_VARIANCE
@@ -332,7 +332,7 @@ open class FirTypeResolveTransformer(
     }
 
     private fun FirMemberDeclaration.addTypeParametersScope() {
-        if (typeParameters.any { it.symbol.name.asString() == "<Self>" }) {
+        if (typeParameters.any { it.symbol.name == SELF_TYPE }) {
             scopes.add(FirSelfTypeScope(this))
         }
         if (typeParameters.isNotEmpty()) {

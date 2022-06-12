@@ -32,6 +32,7 @@ import org.jetbrains.kotlin.fir.scopes.FirScope
 import org.jetbrains.kotlin.fir.scopes.createImportingScopes
 import org.jetbrains.kotlin.fir.scopes.impl.FirLocalScope
 import org.jetbrains.kotlin.fir.scopes.impl.FirMemberTypeParameterScope
+import org.jetbrains.kotlin.fir.scopes.impl.FirSelfTypeScope
 import org.jetbrains.kotlin.fir.scopes.impl.FirWhenSubjectImportingScope
 import org.jetbrains.kotlin.fir.symbols.impl.FirAnonymousFunctionSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirClassLikeSymbol
@@ -442,12 +443,15 @@ class BodyResolveContext(
             .addNonLocalScopeIfNotNull(towerElementsForClass.staticScope)
 
         val typeParameterScope = (owner as? FirRegularClass)?.typeParameterScope()
+        val selfTypeScope: FirSelfTypeScope? =
+            owner.annotations.find { it.fqName(holder.session)?.asString() == "kotlin.Self" }?.let { FirSelfTypeScope(owner) }
 
         val forMembersResolution =
             staticsAndCompanion
                 .addReceiver(labelName, towerElementsForClass.thisReceiver)
                 .addContextReceiverGroup(towerElementsForClass.contextReceivers)
                 .addNonLocalScopeIfNotNull(typeParameterScope)
+                .addNonLocalScopeIfNotNull(selfTypeScope)
 
         val scopeForConstructorHeader =
             staticsAndCompanion.addNonLocalScopeIfNotNull(typeParameterScope)

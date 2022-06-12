@@ -68,19 +68,10 @@ open class FirBodyResolveTransformer(
         } else {
 
             typeResolverTransformer.withFile(context.file) {
-
-                val selfAnnotation =
-                    context.topClassDeclaration?.annotations?.find { it.fqName(session)?.asString() == "kotlin.Self" }
-                val scopes =
-                    if (context.topClassDeclaration != null && selfAnnotation != null)
-                        listOf(FirSelfTypeScope(context.topClassDeclaration!!)) + components.createCurrentScopeList()
-                    else
-                        emptyList()
-
                 transformTypeRef(
                     typeRef,
                     ScopeClassDeclaration(
-                        scopes,
+                        components.createCurrentScopeList(),
                         context.containingClassDeclarations,
                         context.containers.lastOrNull { it is FirTypeParameterRefsOwner && it !is FirAnonymousFunction }
                     )

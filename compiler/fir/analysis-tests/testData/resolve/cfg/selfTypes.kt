@@ -8,7 +8,7 @@ class JustSelfAnnotation {
 @Self
 class ReturnType {
     fun returnTypeWithVal(): Self {
-        val res: Self  = this <!UNCHECKED_CAST!>as Self<!>
+        val res: Self  = this as Self
         return res
     }
 }
@@ -16,14 +16,14 @@ class ReturnType {
 @Self
 class ReturnTypeWithTypeParameter<T> {
     fun returnType(): Self {
-        return this <!UNCHECKED_CAST!>as Self<!>
+        return this as Self
     }
 }
 
 @Self
 class ReturnTypeWithTypeParameters<T, A, F> {
     fun returnType(): Self {
-        return this <!UNCHECKED_CAST!>as Self<!>
+        return this as Self
     }
 }
 
@@ -31,7 +31,7 @@ class InnerClass {
     @Self
     inner class Inner {
         fun returnType(): Self {
-            return this <!UNCHECKED_CAST!>as Self<!>
+            return this as Self
         }
     }
 }
@@ -40,7 +40,7 @@ class StaticClass {
     @Self
     class Static {
         fun returnType(): Self {
-            return this <!UNCHECKED_CAST!>as Self<!>
+            return this as Self
         }
     }
 }
@@ -54,7 +54,7 @@ class InnerSelfClass {
     }
 
     fun returnType(): Self {
-        return this <!UNCHECKED_CAST!>as Self<!>
+        return this as Self
     }
 
     fun returnSelfClassType(): InnerSelfClass.Self {
@@ -68,7 +68,7 @@ class TypeAliasSelf {
     typealias Self = String
 
     fun returnType(): Self {
-        return this <!UNCHECKED_CAST!>as Self<!>
+        return this as Self
     }
 
     fun returnTypealias(): TypeAliasSelf.Self {

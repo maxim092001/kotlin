@@ -247,7 +247,7 @@ open class FirTypeResolveTransformer(
         withScopeCleanup {
             firClass.transformAnnotations(this, null)
 
-            val isSelf = firClass.annotations.any { it.fqName(session)?.asString() == "kotlin.Self" }
+            val isSelf = firClass.annotations.any { it.classId == StandardClassIds.Annotations.Self }
 
             val params = firClass.typeParameters
             if (params is MutableList && isSelf) {

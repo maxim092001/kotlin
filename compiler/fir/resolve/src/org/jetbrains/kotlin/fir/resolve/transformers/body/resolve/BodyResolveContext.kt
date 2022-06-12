@@ -15,6 +15,7 @@ import org.jetbrains.kotlin.fir.declarations.utils.isCompanion
 import org.jetbrains.kotlin.fir.declarations.utils.isInner
 import org.jetbrains.kotlin.fir.expressions.FirCallableReferenceAccess
 import org.jetbrains.kotlin.fir.expressions.FirWhenExpression
+import org.jetbrains.kotlin.fir.expressions.classId
 import org.jetbrains.kotlin.fir.resolve.*
 import org.jetbrains.kotlin.fir.resolve.calls.ImplicitExtensionReceiverValue
 import org.jetbrains.kotlin.fir.resolve.calls.ImplicitReceiverValue
@@ -40,6 +41,7 @@ import org.jetbrains.kotlin.fir.symbols.impl.FirFunctionSymbol
 import org.jetbrains.kotlin.fir.types.*
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.name.SpecialNames.UNDERSCORE_FOR_UNUSED_VAR
+import org.jetbrains.kotlin.name.StandardClassIds
 
 class BodyResolveContext(
     val returnTypeCalculator: ReturnTypeCalculator,
@@ -444,7 +446,7 @@ class BodyResolveContext(
 
         val typeParameterScope = (owner as? FirRegularClass)?.typeParameterScope()
         val selfTypeScope: FirSelfTypeScope? =
-            owner.annotations.find { it.fqName(holder.session)?.asString() == "kotlin.Self" }?.let { FirSelfTypeScope(owner) }
+            owner.annotations.find { it.classId == StandardClassIds.Annotations.Self }?.let { FirSelfTypeScope(owner) }
 
         val forMembersResolution =
             staticsAndCompanion

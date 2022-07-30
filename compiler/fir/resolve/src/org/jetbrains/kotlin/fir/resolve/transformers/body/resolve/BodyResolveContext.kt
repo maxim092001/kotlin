@@ -446,7 +446,10 @@ class BodyResolveContext(
 
         val typeParameterScope = (owner as? FirRegularClass)?.typeParameterScope()
         val selfTypeScope: FirSelfTypeScope? =
-            owner.annotations.find { it.classId == StandardClassIds.Annotations.Self }?.let { FirSelfTypeScope(owner) }
+            if (owner.hasAnnotation(StandardClassIds.Annotations.Self)) {
+                FirSelfTypeScope(owner)
+            } else
+                null
 
         val forMembersResolution =
             staticsAndCompanion

@@ -248,6 +248,9 @@ open class FirTypeResolveTransformer(
         withScopeCleanup {
             firClass.transformAnnotations(this, null)
 
+
+
+
             val isSelf = firClass.hasAnnotation(StandardClassIds.Annotations.Self)
 
             val params = firClass.typeParameters

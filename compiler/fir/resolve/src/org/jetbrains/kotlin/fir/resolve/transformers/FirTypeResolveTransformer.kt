@@ -34,6 +34,7 @@ import org.jetbrains.kotlin.fir.types.builder.buildErrorTypeRef
 import org.jetbrains.kotlin.fir.types.builder.buildResolvedTypeRef
 import org.jetbrains.kotlin.fir.types.impl.ConeTypeParameterTypeImpl
 import org.jetbrains.kotlin.name.SpecialNames.SELF_TYPE
+import org.jetbrains.kotlin.name.StandardClassIds
 import org.jetbrains.kotlin.types.Variance
 
 class FirTypeResolveProcessor(
@@ -247,7 +248,7 @@ open class FirTypeResolveTransformer(
         withScopeCleanup {
             firClass.transformAnnotations(this, null)
 
-            val isSelf = firClass.annotations.any { it.classId == StandardClassIds.Annotations.Self }
+            val isSelf = firClass.hasAnnotation(StandardClassIds.Annotations.Self)
 
             val params = firClass.typeParameters
             if (params is MutableList && isSelf) {

@@ -36,9 +36,9 @@ class InnerClass {
     }
 }
 
-class StaticClass {
+class NestedClass {
     @Self
-    class Static {
+    class Nested {
         fun returnType(): Self {
             return this as Self
         }

@@ -250,6 +250,12 @@ open class FirTypeResolveTransformer(
 
             val isSelf = firClass.hasAnnotation(StandardClassIds.Annotations.Self)
 
+
+
+
+
+
+
             val params = firClass.typeParameters
             if (params is MutableList && isSelf) {
                 val selfSymbol = FirTypeParameterSymbol()
